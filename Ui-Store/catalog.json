@@ -1,0 +1,146 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-10-19T11:36:33.981Z",
+  "repository": "Sansmatic-z/OpenUi",
+  "items": [
+    {
+      "id": "ui-Midclass-mvf6ifr7",
+      "name": "Deepseek Html 20261017 51e3ae 1",
+      "slug": "Midclass",
+      "description": "Clean dashboard component built with HTML and Tailwind CSS.",
+      "category": "dashboard",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/midclass-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-19T11:36:33.091Z",
+      "updatedAt": "2026-10-19T11:36:33.091Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "27fd6000bd697ea4e89689abc7e5a234be6fd0bd"
+    },
+    {
+      "id": "ui-saas-hero-conversion",
+      "name": "SaaS Precision Hero Section",
+      "slug": "saas-precision-hero",
+      "description": "Clean conversion-focused landing hero featuring typographic hierarchy, proof metrics, and dual CTAs with zero-pill discipline.",
+      "category": "landing",
+      "tags": [
+        "Hero",
+        "Landing",
+        "Tailwind",
+        "Conversion"
+      ],
+      "filePath": "Ui-Store/saas-precision-hero.html",
+      "author": "DesignStudio",
+      "createdAt": "2026-03-12T10:00:00Z",
+      "updatedAt": "2026-03-12T10:00:00Z",
+      "downloadsCount": 1420,
+      "copiesCount": 2890,
+      "sha": ""
+    },
+    {
+      "id": "ui-metric-sparkline-card",
+      "name": "Telemetry Analytics Metric Card",
+      "slug": "telemetry-metric-card",
+      "description": "Compact production metric monitor with SVG sparkline curve, threshold delta, and tabular numerals.",
+      "category": "dashboard",
+      "tags": [
+        "Dashboard",
+        "Metrics",
+        "Analytics",
+        "Sparkline"
+      ],
+      "filePath": "Ui-Store/telemetry-metric-card.html",
+      "author": "QuantForge",
+      "createdAt": "2026-03-14T14:20:00Z",
+      "updatedAt": "2026-03-14T14:20:00Z",
+      "downloadsCount": 890,
+      "copiesCount": 1650,
+      "sha": ""
+    },
+    {
+      "id": "ui-pricing-matrix-pro",
+      "name": "Modular Tiered Pricing Card",
+      "slug": "tiered-pricing-card",
+      "description": "High-converting pricing component with annual toggle highlight, feature guarantees, and direct checkout trigger.",
+      "category": "ecommerce",
+      "tags": [
+        "Pricing",
+        "SaaS",
+        "Checkout",
+        "Cards"
+      ],
+      "filePath": "Ui-Store/tiered-pricing-card.html",
+      "author": "VentureScale",
+      "createdAt": "2026-03-10T08:00:00Z",
+      "updatedAt": "2026-03-10T08:00:00Z",
+      "downloadsCount": 2150,
+      "copiesCount": 3940,
+      "sha": ""
+    },
+    {
+      "id": "ui-product-purchase-module",
+      "name": "Artisanal Product Purchase Module",
+      "slug": "product-purchase-module",
+      "description": "Minimalist high-ticket retail module with color variants, size matrix, and guaranteed inventory status.",
+      "category": "ecommerce",
+      "tags": [
+        "E-Commerce",
+        "Retail",
+        "Product",
+        "Checkout"
+      ],
+      "filePath": "Ui-Store/product-purchase-module.html",
+      "author": "AtelierNordic",
+      "createdAt": "2026-03-05T12:00:00Z",
+      "updatedAt": "2026-03-05T12:00:00Z",
+      "downloadsCount": 1780,
+      "copiesCount": 2410,
+      "sha": ""
+    },
+    {
+      "id": "ui-admin-auth-card",
+      "name": "Secure Multi-Factor Auth Card",
+      "slug": "admin-auth-card",
+      "description": "Production-ready authentication screen with zero-trust biometric & credentials inputs and key validation states.",
+      "category": "forms",
+      "tags": [
+        "Auth",
+        "Login",
+        "Security",
+        "Forms"
+      ],
+      "filePath": "Ui-Store/admin-auth-card.html",
+      "author": "ShieldOps",
+      "createdAt": "2026-03-01T09:30:00Z",
+      "updatedAt": "2026-03-01T09:30:00Z",
+      "downloadsCount": 1620,
+      "copiesCount": 3100,
+      "sha": ""
+    },
+    {
+      "id": "ui-compact-audio-player",
+      "name": "Tactile Audio Control Widget",
+      "slug": "tactile-audio-player",
+      "description": "Sleek sound scrubber card with time-code display, waveform bars, and tactile playback controls.",
+      "category": "cards",
+      "tags": [
+        "Audio",
+        "Media",
+        "Player",
+        "Tactile"
+      ],
+      "filePath": "Ui-Store/tactile-audio-player.html",
+      "author": "AcousticLab",
+      "createdAt": "2026-02-24T18:00:00Z",
+      "updatedAt": "2026-02-24T18:00:00Z",
+      "downloadsCount": 970,
+      "copiesCount": 1840,
+      "sha": ""
+    }
+  ]
+}
