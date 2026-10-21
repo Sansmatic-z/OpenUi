@@ -1,8 +1,27 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T16:51:03.963Z",
+  "lastUpdated": "2026-10-21T16:59:23.265Z",
   "repository": "Sansmatic-z/OpenUi",
   "items": [
+    {
+      "id": "ui-simple-full-ui-mvicxans",
+      "name": "Simple full ui",
+      "slug": "simple-full-ui",
+      "description": "Enjoy 😊",
+      "category": "ecommerce",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/simple-full-ui-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-21T16:59:22.552Z",
+      "updatedAt": "2026-10-21T16:59:22.552Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "26b169efad83a318472be644c12f884b1a4c9a22"
+    },
     {
       "id": "ui-glass-v2-mvicmlni",
       "name": "Glass v2",
