@@ -1,8 +1,27 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T14:50:50.513Z",
+  "lastUpdated": "2026-10-21T15:03:26.798Z",
   "repository": "Sansmatic-z/OpenUi",
   "items": [
+    {
+      "id": "ui-lps66790-mvi8s78i",
+      "name": "Lps66790",
+      "slug": "lps66790",
+      "description": "Clean ecommerce component built with HTML and Tailwind CSS.",
+      "category": "ecommerce",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/lps66790-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-21T15:03:26.370Z",
+      "updatedAt": "2026-10-21T15:03:26.370Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "51c40b7082bcf02891bcf1af55f879dcee127ba0"
+    },
     {
       "id": "ui-teaui-mvi8bzfs",
       "name": "Teaui",
