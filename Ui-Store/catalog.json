@@ -1,8 +1,27 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T16:48:38.662Z",
+  "lastUpdated": "2026-10-21T16:51:03.963Z",
   "repository": "Sansmatic-z/OpenUi",
   "items": [
+    {
+      "id": "ui-glass-v2-mvicmlni",
+      "name": "Glass v2",
+      "slug": "glass-v2",
+      "description": "Enjoy 😊",
+      "category": "landing",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/glass-v2-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-21T16:51:03.582Z",
+      "updatedAt": "2026-10-21T16:51:03.582Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "e59b9555a93a6915f2c67cba1d39849c215306e7"
+    },
     {
       "id": "ui-glass1-mvicjhfj",
       "name": "Glass1",
