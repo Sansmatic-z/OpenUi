@@ -1,8 +1,27 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T14:43:49.641Z",
+  "lastUpdated": "2026-10-21T14:50:50.513Z",
   "repository": "Sansmatic-z/OpenUi",
   "items": [
+    {
+      "id": "ui-teaui-mvi8bzfs",
+      "name": "Teaui",
+      "slug": "teaui",
+      "description": "Idk figure out ur self.",
+      "category": "landing",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/teaui-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-21T14:50:49.768Z",
+      "updatedAt": "2026-10-21T14:50:49.769Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "a1e72a2cab2d4d3573e9ed5029450d1fd491388d"
+    },
     {
       "id": "ui-lsp999-mvi82yso",
       "name": "Lsp999",
