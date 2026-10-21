@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alpenglow — Glass Sign-in</title>
+<meta name="description" content="A glassmorphism sign-in concept. Demo build: authentication is simulated locally.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ Tokens ============ */
+:root{
+  --ink:#241d3e;
+  --ink-muted:#524b73;
+  --ink-faint:#6b6488;
+  --glass-hi:rgba(255,255,255,.62);
+  --glass-lo:rgba(255,255,255,.38);
+  --field-bg:rgba(255,255,255,.52);
+  --field-edge:rgba(255,255,255,.75);
+  --label-bg:rgba(255,255,255,.92);
+  --primary-a:#ffd08a;
+  --primary-b:#ff9d4d;
+  --primary-ink:#2a1503;
+  --focus:#3b2fbf;
+  --danger:#8a1f2f;
+  --danger-edge:#b3263a;
+  --ok:#1d7a4f;
+  --radius-lg:24px;
+  --radius-md:14px;
+  --shadow-slab:0 34px 70px rgba(8,6,34,.5), 0 8px 22px rgba(8,6,34,.35);
+  --font-display:"Sora",system-ui,sans-serif;
+  --font-body:"Manrope",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:#0a0e2c;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+
+/* ============ Scene (background) ============ */
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.sky{position:absolute;inset:0;
+  background:linear-gradient(#0a0e2c 0%,#232a63 30%,#5b4a94 50%,#c76b98 62%,#ff9e6b 70%,#ffd9a0 74%,#ffd9a0 100%);}
+.stars{position:absolute;inset:0 0 55% 0;opacity:.9;animation:twinkle 5s ease-in-out infinite alternate;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.9),transparent),
+    radial-gradient(1px 1px at 28% 8%,rgba(255,255,255,.7),transparent),
+    radial-gradient(1.5px 1.5px at 44% 22%,rgba(255,255,255,.8),transparent),
+    radial-gradient(1px 1px at 61% 12%,rgba(255,255,255,.65),transparent),
+    radial-gradient(1.5px 1.5px at 78% 20%,rgba(255,255,255,.8),transparent),
+    radial-gradient(1px 1px at 90% 9%,rgba(255,255,255,.7),transparent);}
+.sun{position:absolute;left:66%;top:60%;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,#fff7dc 0%,#ffd77a 45%,rgba(255,180,90,0) 72%);
+  filter:blur(2px);animation:sunPulse 7s ease-in-out infinite alternate;}
+.mist{position:absolute;left:-12%;right:-12%;top:56%;height:20%;filter:blur(14px);
+  background:
+    radial-gradient(60% 100% at 30% 50%,rgba(255,255,255,.26),transparent 70%),
+    radial-gradient(50% 100% at 76% 40%,rgba(255,255,255,.2),transparent 70%);
+  animation:mistDrift 30s ease-in-out infinite alternate;}
+.mountains{position:absolute;left:0;right:0;bottom:26%;height:36%;width:100%}
+.pines{position:absolute;bottom:25%;height:190px;width:230px}
+.pines.left{left:-30px}
+.pines.right{right:-30px;transform:scaleX(-1)}
+.lake{position:absolute;left:0;right:0;bottom:0;height:27%;
+  background:linear-gradient(#ffd9a0 0%,#d67e8e 30%,#4a3f86 72%,#232057 100%);}
+.lake::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(46% 90% at 70% 0,rgba(255,222,150,.8),rgba(255,160,90,.28) 42%,transparent 72%);}
+.lake::after{content:"";position:absolute;inset:0;opacity:.5;
+  background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(255,255,255,.07) 14px 16px);
+  animation:shimmer 9s linear infinite;}
+.scene::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 190px rgba(5,5,22,.6)}
+#sparks{position:absolute;inset:0;width:100%;height:100%}
+
+/* Crystal shards floating around the slab */
+.shard{position:absolute;filter:drop-shadow(0 8px 14px rgba(16,12,56,.4));opacity:.75;
+  background:linear-gradient(140deg,rgba(255,255,255,.9),rgba(160,200,255,.4) 45%,rgba(255,190,230,.35));
+  animation:shardFloat 9s ease-in-out infinite alternate;}
+.shard.s1{left:16%;top:38%;width:54px;height:74px;clip-path:polygon(50% 0,100% 38%,78% 100%,18% 88%,0 34%)}
+.shard.s2{right:15%;top:32%;width:40px;height:56px;clip-path:polygon(50% 0,100% 45%,62% 100%,0 70%);animation-delay:-3s}
+.shard.s3{left:22%;bottom:24%;width:34px;height:46px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);animation-delay:-5s}
+.shard.s4{right:21%;bottom:28%;width:48px;height:64px;clip-path:polygon(40% 0,100% 30%,82% 100%,10% 82%);animation-delay:-7s}
+.shard.s5{left:9%;top:56%;width:26px;height:34px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);animation-delay:-2s}
+.shard.s6{right:8%;top:58%;width:30px;height:40px;clip-path:polygon(50% 0,100% 42%,70% 100%,8% 78%);animation-delay:-6s}
+
+/* ============ Layout ============ */
+.stage{position:relative;z-index:1;min-height:100svh;display:grid;justify-items:center;
+  align-content:center;gap:30px;padding:44px 20px 56px}
+.masthead{text-align:center;color:#fff}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;
+  letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.eyebrow::before,.eyebrow::after{content:"";width:34px;height:1px;background:rgba(255,255,255,.5)}
+.masthead h1{font-family:var(--font-display);font-weight:700;font-size:clamp(34px,6vw,56px);
+  letter-spacing:-.02em;margin-top:10px;text-shadow:0 2px 24px rgba(255,170,110,.45),0 1px 3px rgba(10,8,40,.6)}
+.masthead p{margin-top:8px;font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+
+/* ============ Glass slab ============ */
+.slab-float{animation:slabFloat 8s ease-in-out infinite;perspective:1200px}
+.slab-tilt{transform-style:preserve-3d;transition:transform .18s ease-out;will-change:transform}
+.slab{position:relative;width:min(400px,calc(100vw - 40px));padding:34px 30px 28px;border-radius:var(--radius-lg);
+  background:linear-gradient(165deg,var(--glass-hi),var(--glass-lo) 46%,rgba(255,255,255,.5));
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+  border:1px solid transparent;
+  background-clip:padding-box;
+  box-shadow:var(--shadow-slab),
+    inset 0 1px 0 rgba(255,255,255,.85),
+    inset 0 -1px 0 rgba(255,255,255,.3),
+    inset 1px 0 0 rgba(255,255,255,.4),
+    inset -1px 0 0 rgba(255,255,255,.4);
+  border-image:none;
+}
+/* Iridescent rim */
+.slab::before{content:"";position:absolute;inset:-2px;border-radius:calc(var(--radius-lg) + 2px);z-index:-1;
+  background:linear-gradient(160deg,#ffffff 0%,rgba(255,255,255,.15) 18%,#9fd8ff 36%,#e6b3ff 52%,#ffe3b3 68%,rgba(255,255,255,.15) 84%,#ffffff 100%);
+  filter:blur(1px);opacity:.85}
+/* Specular streak */
+.slab::after{content:"";position:absolute;top:-8%;left:6%;width:58%;height:42%;pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,.55),rgba(255,255,255,0) 62%);
+  transform:rotate(-6deg);filter:blur(6px);border-radius:50%}
+.screw{position:absolute;width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#ffffff,#cfd6e6 40%,#8b93a8 72%,#5a6178);
+  box-shadow:inset 0 -1px 2px rgba(0,0,0,.45),0 1px 2px rgba(255,255,255,.7)}
+.screw::after{content:"";position:absolute;left:2px;right:2px;top:50%;height:1.5px;margin-top:-.75px;
+  background:rgba(40,44,60,.65);transform:rotate(45deg);border-radius:2px}
+.screw.tl{top:11px;left:11px}.screw.tr{top:11px;right:11px}
+.screw.bl{bottom:11px;left:11px}.screw.br{bottom:11px;right:11px}
+
+/* Avatar medallion */
+.medallion{width:78px;height:78px;margin:0 auto 20px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,.45));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(20,16,60,.28);
+  position:relative}
+.medallion::before{content:"";position:absolute;inset:-3px;border-radius:50%;
+  background:conic-gradient(#9fd8ff,#e6b3ff,#ffe3b3,#9fd8ff);opacity:.8;filter:blur(2px);z-index:-1}
+.medallion svg{width:34px;height:34px;stroke:var(--ink-muted)}
+
+/* ============ Form ============ */
+form{display:grid;gap:16px}
+.field{position:relative}
+.field input{width:100%;height:54px;padding:0 46px;border-radius:var(--radius-md);
+  font:500 15px/1 var(--font-body);color:var(--ink);
+  background:var(--field-bg);border:1px solid var(--field-edge);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8),inset 0 -3px 8px rgba(110,100,180,.14);
+  transition:border-color .15s,box-shadow .15s}
+.field input::placeholder{color:transparent}
+.field input:focus{outline:none;border-color:var(--focus);
+  box-shadow:0 0 0 3px rgba(59,47,191,.22),inset 0 1px 0 rgba(255,255,255,.8)}
+.field .icon{position:absolute;left:15px;top:50%;translate:0 -50%;width:19px;height:19px;
+  stroke:var(--ink-muted);pointer-events:none}
+.field label{position:absolute;left:46px;top:50%;translate:0 -50%;font-size:15px;color:var(--ink-muted);
+  pointer-events:none;transition:all .16s ease}
+.field input:focus ~ label,
+.field input:not(:placeholder-shown) ~ label{
+  top:0;left:34px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-muted);background:var(--label-bg);padding:3px 8px;border-radius:6px}
+.field.invalid input{border-color:var(--danger-edge);box-shadow:0 0 0 3px rgba(179,38,58,.16)}
+.toggle-pass{position:absolute;right:9px;top:50%;translate:0 -50%;width:36px;height:36px;border:0;
+  border-radius:10px;background:transparent;cursor:pointer;display:grid;place-items:center}
+.toggle-pass:hover{background:rgba(255,255,255,.45)}
+.toggle-pass svg{width:20px;height:20px;stroke:var(--ink-muted)}
+.error{display:flex;align-items:flex-start;gap:6px;margin-top:6px;font-size:13px;font-weight:600;color:var(--danger)}
+.error svg{width:15px;height:15px;flex:none;margin-top:1px;stroke:var(--danger)}
+.hint{margin-top:6px;font-size:12.5px;font-weight:600;color:var(--ink-muted)}
+
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.check{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink-muted);cursor:pointer}
+.check input{width:17px;height:17px;accent-color:var(--focus);cursor:pointer}
+.linklike{border:0;background:none;font:600 13.5px var(--font-body);color:var(--focus);
+  cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 2px;border-radius:6px}
+.linklike:hover{color:#2a2199}
+
+.btn-primary{position:relative;height:54px;border:0;border-radius:16px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  font:700 16px var(--font-display);letter-spacing:.02em;color:var(--primary-ink);
+  background:linear-gradient(180deg,var(--primary-a),var(--primary-b));
+  box-shadow:0 10px 26px rgba(255,150,70,.42),inset 0 1px 0 rgba(255,255,255,.75),inset 0 -2px 0 rgba(160,70,0,.25);
+  transition:transform .12s,box-shadow .12s,filter .12s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(255,150,70,.5),inset 0 1px 0 rgba(255,255,255,.75)}
+.btn-primary:active{transform:translateY(1px);filter:saturate(.9)}
+.btn-primary:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.btn-primary .arrow{transition:transform .15s}
+.btn-primary:hover .arrow{transform:translateX(3px)}
+.btn-primary svg{width:19px;height:19px;stroke:var(--primary-ink)}
+.spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(42,21,3,.3);
+  border-top-color:var(--primary-ink);animation:spin .7s linear infinite}
+.btn-quiet{height:46px;padding:0 22px;border-radius:13px;cursor:pointer;
+  font:700 14.5px var(--font-body);color:var(--ink);
+  background:rgba(255,255,255,.5);border:1px solid var(--field-edge);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8);transition:background .12s}
+.btn-quiet:hover{background:rgba(255,255,255,.72)}
+.fineprint{margin-top:14px;text-align:center;font-size:12px;color:var(--ink-faint)}
+
+/* Success panel */
+.success{text-align:center;display:grid;gap:14px;justify-items:center;padding:8px 0 4px}
+.success .badge{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(165deg,#e9f9f0,#c9f0dd);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(20,60,40,.25);animation:popIn .35s ease-out}
+.success .badge svg{width:34px;height:34px;stroke:var(--ok)}
+.success h2{font:700 22px var(--font-display);color:var(--ink)}
+.success p{font-size:14px;color:var(--ink-muted);max-width:26ch}
+
+/* Dialog */
+dialog{border:0;border-radius:20px;padding:28px;max-width:380px;width:calc(100vw - 44px);color:var(--ink);
+  background:linear-gradient(rgba(255,255,255,.82),rgba(255,255,255,.66));
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);backdrop-filter:blur(24px) saturate(1.4);
+  box-shadow:var(--shadow-slab)}
+dialog::backdrop{background:rgba(10,8,32,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+dialog h2{font:700 19px var(--font-display);margin-bottom:10px}
+dialog p{font-size:14px;color:var(--ink-muted);margin-bottom:10px}
+dialog .btn-quiet{margin-top:8px;width:100%}
+
+/* Shake on failed submit */
+.shake{animation:shake .4s ease}
+
+/* ============ Keyframes ============ */
+@keyframes slabFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes twinkle{from{opacity:.55}to{opacity:1}}
+@keyframes sunPulse{from{transform:scale(1);opacity:.92}to{transform:scale(1.08);opacity:1}}
+@keyframes mistDrift{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
+@keyframes shimmer{from{background-position:0 0}to{background-position:280px 0}}
+@keyframes shardFloat{from{transform:translateY(-8px) rotate(-4deg)}to{transform:translateY(10px) rotate(6deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ============ Responsive ============ */
+@media (max-width:720px){
+  .shard{display:none}
+  .pines{height:140px;width:170px}
+}
+@media (max-width:440px){
+  .stage{padding:32px 14px 44px;gap:22px}
+  .slab{padding:28px 20px 22px}
+  .masthead p{font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- Background scene -->
+<div class="scene" aria-hidden="true">
+  <div class="sky"></div>
+  <div class="stars"></div>
+  <div class="sun"></div>
+  <div class="mist"></div>
+  <svg class="mountains" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#6f5fa8" opacity=".75" d="M0 230 120 150 240 205 360 118 480 195 620 96 760 185 900 128 1040 195 1180 140 1320 205 1440 158V320H0Z"/>
+    <path fill="#221c4e" d="M0 268 150 190 300 250 470 160 640 245 820 170 990 250 1160 185 1320 252 1440 205V320H0Z"/>
+    <path fill="#e8ecff" opacity=".9" d="M470 160l34 20-16 6-18-12-16 12-16-7zM820 170l30 18-14 6-16-11-14 11-14-6z"/>
+  </svg>
+  <svg class="pines left" viewBox="0 0 230 190">
+    <g fill="#0c1226">
+      <path d="M60 190V96M60 96l-26 40h14l-20 32h16l-24 34h80l-24-34h16l-20-32h14z" transform="translate(0,0)"/>
+      <path d="M140 190V120M140 120l-20 32h11l-16 26h13l-19 28h62l-19-28h13l-16-26h11z"/>
+      <path d="M205 190V140M205 140l-15 24h8l-12 20h10l-14 22h46l-14-22h10l-12-20h8z"/>
+    </g>
+  </svg>
+  <svg class="pines right" viewBox="0 0 230 190">
+    <g fill="#0c1226">
+      <path d="M60 190V96M60 96l-26 40h14l-20 32h16l-24 34h80l-24-34h16l-20-32h14z"/>
+      <path d="M150 190V126M150 126l-19 30h10l-15 25h12l-18 27h60l-18-27h12l-15-25h10z"/>
+    </g>
+  </svg>
+  <div class="lake"></div>
+  <div class="shard s1"></div><div class="shard s2"></div><div class="shard s3"></div>
+  <div class="shard s4"></div><div class="shard s5"></div><div class="shard s6"></div>
+  <canvas id="sparks"></canvas>
+</div>
+
+<main class="stage">
+  <header class="masthead">
+    <span class="eyebrow">Glass sign-in</span>
+    <h1>Alpenglow</h1>
+    <p>Member access · demo build</p>
+  </header>
+
+  <div class="slab-float">
+    <div class="slab-tilt" id="tilt">
+      <section class="slab" aria-labelledby="form-title">
+        <span class="screw tl"></span><span class="screw tr"></span>
+        <span class="screw bl"></span><span class="screw br"></span>
+
+        <div class="medallion" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/>
+          </svg>
+        </div>
+
+        <!-- Sign-in form -->
+        <form id="login-form" novalidate>
+          <h2 id="form-title" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Sign in</h2>
+
+          <div class="field" id="field-user">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>
+            <input id="username" name="username" type="text" placeholder=" " autocomplete="username"
+                   aria-describedby="user-error" required minlength="3">
+            <label for="username">Username</label>
+            <p class="error" id="user-error" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+              <span></span>
+            </p>
+          </div>
+
+          <div class="field" id="field-pass">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+            <input id="password" name="password" type="password" placeholder=" " autocomplete="current-password"
+                   aria-describedby="pass-error caps-hint" required minlength="6" style="padding-right:52px">
+            <label for="password">Password</label>
+            <button type="button" class="toggle-pass" id="toggle-pass" aria-label="Show password" aria-pressed="false">
+              <svg id="eye-on" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/></svg>
+              <svg id="eye-off" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" hidden><path d="M2 12s3.6-6.5 10-6.5c2 0 3.7.6 5.2 1.5M22 12s-3.6 6.5-10 6.5c-2 0-3.7-.6-5.2-1.5"/><path d="M4 20 20 4"/></svg>
+            </button>
+            <p class="error" id="pass-error" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>
+              <span></span>
+            </p>
+            <p class="hint" id="caps-hint" hidden role="status">Caps Lock is on.</p>
+          </div>
+
+          <div class="row">
+            <label class="check"><input type="checkbox" id="remember" name="remember"> Remember me</label>
+            <button type="button" class="linklike" id="forgot-btn">Forgot password?</button>
+          </div>
+
+          <button class="btn-primary" type="submit" id="submit-btn">
+            <span class="spinner" id="spinner" hidden></span>
+            <span id="btn-label">Log in</span>
+            <svg class="arrow" id="btn-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+
+          <p class="fineprint">Demo interface — validation &amp; sign-in run locally in your browser. Any username (3+ chars) and password (6+ chars) is accepted.</p>
+        </form>
+
+        <!-- Success state -->
+        <div class="success" id="success-panel" hidden>
+          <div class="badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+          </div>
+          <h2 id="success-title" tabindex="-1">You're in</h2>
+          <p id="success-msg">Signed in as —. Demo session only; nothing was sent to a server.</p>
+          <button class="btn-quiet" type="button" id="signout-btn">Sign out</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- Forgot-password dialog -->
+<dialog id="forgot-dialog" aria-labelledby="forgot-title">
+  <h2 id="forgot-title">Reset your password</h2>
+  <p>This is a front-end demo, so password reset isn't wired to a server and no email will be sent.</p>
+  <p>In a production build this would email you a secure reset link.</p>
+  <button class="btn-quiet" type="button" id="forgot-close">Got it</button>
+</dialog>
+
+<noscript><p style="position:relative;z-index:2;color:#fff;text-align:center;padding:12px">This demo requires JavaScript.</p></noscript>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* ---------- Elements ---------- */
+  var form = document.getElementById("login-form");
+  var userEl = document.getElementById("username");
+  var passEl = document.getElementById("password");
+  var userField = document.getElementById("field-user");
+  var passField = document.getElementById("field-pass");
+  var userErr = document.getElementById("user-error");
+  var passErr = document.getElementById("pass-error");
+  var capsHint = document.getElementById("caps-hint");
+  var submitBtn = document.getElementById("submit-btn");
+  var btnLabel = document.getElementById("btn-label");
+  var btnArrow = document.getElementById("btn-arrow");
+  var spinner = document.getElementById("spinner");
+  var successPanel = document.getElementById("success-panel");
+  var successMsg = document.getElementById("success-msg");
+  var successTitle = document.getElementById("success-title");
+  var signoutBtn = document.getElementById("signout-btn");
+  var togglePass = document.getElementById("toggle-pass");
+  var eyeOn = document.getElementById("eye-on");
+  var eyeOff = document.getElementById("eye-off");
+  var forgotBtn = document.getElementById("forgot-btn");
+  var forgotDlg = document.getElementById("forgot-dialog");
+  var forgotClose = document.getElementById("forgot-close");
+  var slab = document.querySelector(".slab");
+
+  /* ---------- Validation ---------- */
+  function setError(field, errEl, msg){
+    var span = errEl.querySelector("span");
+    if (msg){ field.classList.add("invalid"); errEl.hidden = false; span.textContent = msg;
+      field.querySelector("input").setAttribute("aria-invalid","true"); }
+    else { field.classList.remove("invalid"); errEl.hidden = true; span.textContent = "";
+      field.querySelector("input").removeAttribute("aria-invalid"); }
+  }
+  function validate(){
+    var ok = true, first = null;
+    var u = userEl.value.trim(), p = passEl.value;
+    if (!u){ setError(userField, userErr, "Enter your username."); ok = false; first = first || userEl; }
+    else if (u.length < 3){ setError(userField, userErr, "Username needs at least 3 characters."); ok = false; first = first || userEl; }
+    else setError(userField, userErr, null);
+    if (!p){ setError(passField, passErr, "Enter your password."); ok = false; first = first || passEl; }
+    else if (p.length < 6){ setError(passField, passErr, "Password needs at least 6 characters."); ok = false; first = first || passEl; }
+    else setError(passField, passErr, null);
+    if (first) first.focus();
+    return ok;
+  }
+  userEl.addEventListener("input", function(){ setError(userField, userErr, null); });
+  passEl.addEventListener("input", function(){ setError(passField, passErr, null); });
+
+  /* ---------- Submit (local demo auth) ---------- */
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    if (submitBtn.disabled) return;
+    if (!validate()){
+      if (!reduced.matches){ slab.classList.remove("shake"); void slab.offsetWidth; slab.classList.add("shake"); }
+      return;
+    }
+    submitBtn.disabled = true;
+    spinner.hidden = false; btnArrow.hidden = true;
+    btnLabel.textContent = "Signing in…";
+    submitBtn.setAttribute("aria-busy","true");
+    setTimeout(function(){                       // simulated latency, local only
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute("aria-busy");
+      spinner.hidden = true; btnArrow.hidden = false;
+      btnLabel.textContent = "Log in";
+      form.hidden = true;
+      successMsg.textContent = "Signed in as \u201C" + userEl.value.trim() + "\u201D. Demo session only — nothing was sent to a server.";
+      successPanel.hidden = false;
+      successTitle.focus();
+    }, 900);
+  });
+
+  signoutBtn.addEventListener("click", function(){
+    successPanel.hidden = true;
+    form.hidden = false;
+    form.reset();
+    setError(userField, userErr, null); setError(passField, passErr, null);
+    userEl.focus();
+  });
+
+  /* ---------- Show / hide password ---------- */
+  togglePass.addEventListener("click", function(){
+    var show = passEl.type === "password";
+    passEl.type = show ? "text" : "password";
+    togglePass.setAttribute("aria-pressed", String(show));
+    togglePass.setAttribute("aria-label", show ? "Hide password" : "Show password");
+    eyeOn.hidden = show; eyeOff.hidden = !show;
+    passEl.focus({ preventScroll:true });
+  });
+
+  /* ---------- Caps Lock hint ---------- */
+  function capsCheck(e){
+    if (typeof e.getModifierState !== "function") return;
+    capsHint.hidden = !e.getModifierState("CapsLock");
+  }
+  passEl.addEventListener("keydown", capsCheck);
+  passEl.addEventListener("keyup", capsCheck);
+  passEl.addEventListener("blur", function(){ capsHint.hidden = true; });
+
+  /* ---------- Forgot dialog ---------- */
+  forgotBtn.addEventListener("click", function(){ forgotDlg.showModal(); });
+  forgotClose.addEventListener("click", function(){ forgotDlg.close(); });
+
+  /* ---------- 3D tilt (fine pointers, motion allowed) ---------- */
+  var tilt = document.getElementById("tilt");
+  var fine = window.matchMedia("(pointer: fine)").matches;
+  var ticking = false, px = 0, py = 0;
+  function applyTilt(){
+    ticking = false;
+    tilt.style.transform = "rotateY(" + (px * 6).toFixed(2) + "deg) rotateX(" + (-py * 5).toFixed(2) + "deg)";
+  }
+  if (fine){
+    window.addEventListener("pointermove", function(e){
+      if (reduced.matches) return;
+      px = (e.clientX / window.innerWidth) - 0.5;
+      py = (e.clientY / window.innerHeight) - 0.5;
+      if (!ticking){ ticking = true; requestAnimationFrame(applyTilt); }
+    });
+  }
+
+  /* ---------- Firefly sparks ---------- */
+  var canvas = document.getElementById("sparks");
+  var ctx = canvas.getContext("2d");
+  var parts = [], W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function resize(){
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.min(64, Math.round(W * H / 24000));
+    parts = [];
+    for (var i = 0; i < n; i++) parts.push(spawn(true));
+  }
+  function spawn(init){
+    var warm = Math.random() > 0.25;
+    return {
+      x: Math.random() * W,
+      y: init ? Math.random() * H : H + 8,
+      r: 0.8 + Math.random() * 1.9,
+      vy: 0.15 + Math.random() * 0.4,
+      ph: Math.random() * Math.PI * 2,
+      sp: 0.4 + Math.random() * 0.8,
+      c: warm ? "255,190,110" : "170,200,255"
+    };
+  }
+  var last = 0, running = true;
+  function loop(t){
+    if (!running) return;
+    requestAnimationFrame(loop);
+    if (t - last < 33) return;      // ~30fps
+    last = t;
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < parts.length; i++){
+      var p = parts[i];
+      p.y -= p.vy; p.ph += 0.02 * p.sp;
+      p.x += Math.sin(p.ph) * 0.35;
+      if (p.y < -10) parts[i] = p = spawn(false);
+      var a = 0.25 + 0.45 * (0.5 + 0.5 * Math.sin(p.ph * 2));
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(" + p.c + "," + a.toFixed(2) + ")";
+      ctx.shadowColor = "rgba(" + p.c + ",.8)";
+      ctx.shadowBlur = 7;
+      ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden){ running = false; }
+    else if (!reduced.matches){ running = true; requestAnimationFrame(loop); }
+  });
+  if (!reduced.matches) requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
