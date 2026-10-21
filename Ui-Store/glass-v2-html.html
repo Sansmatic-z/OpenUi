@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alpenglow — Glass workspace</title>
+<meta name="description" content="Alpenglow: a liquid-glass workspace demo. Landing, auth, dashboard, projects, analytics and settings in one file. All data stays in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ================= TOKENS ================= */
+:root{
+  --ink:#241d3e; --ink-muted:#524b73; --ink-faint:#6b6488;
+  --lt-text:#241d3e; --lt-muted:#524b73;
+  --dk-text:#edeaff; --dk-muted:#b9b4de; --dk-faint:#8f8ab8;
+  --sf-dusk:linear-gradient(165deg,rgba(32,28,72,.72),rgba(17,15,44,.62));
+  --sf-dusk-edge:rgba(255,255,255,.14);
+  --sf-light:linear-gradient(165deg,rgba(255,255,255,.62),rgba(255,255,255,.38) 46%,rgba(255,255,255,.5));
+  --rim:linear-gradient(160deg,#fff 0%,rgba(255,255,255,.15) 18%,#9fd8ff 36%,#e6b3ff 52%,#ffe3b3 68%,rgba(255,255,255,.15) 84%,#fff 100%);
+  --primary-a:#ffd08a; --primary-b:#ff9d4d; --primary-ink:#2a1503;
+  --c-blue:#8fd0ff; --c-pink:#e6b3ff;
+  --focus-ring:#ffd08a;
+  --danger:#ff8f9e; --danger-ink:#8a1f2f; --ok:#5ad6a0; --ok-ink:#1d7a4f;
+  --r-lg:24px; --r-md:14px; --r-sm:10px;
+  --shadow-d:0 24px 60px rgba(6,5,26,.5);
+  --font-d:"Sora",system-ui,sans-serif; --font-b:"Manrope",system-ui,sans-serif;
+  --gap:20px;
+}
+[data-accent="glacier"]{--primary-a:#bfe3ff;--primary-b:#6fb6f2;--primary-ink:#08243c}
+[data-accent="orchid"]{--primary-a:#f0d0ff;--primary-b:#cf8df2;--primary-ink:#33104d}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);color:var(--dk-text);background:#0a0e2c;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;border-radius:6px}
+.glass-light :focus-visible,.on-light :focus-visible{outline-color:#3b2fbf}
+button{font:inherit;color:inherit}
+.ic{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.skip{position:fixed;left:12px;top:-48px;z-index:99;background:#171439;color:#fff;padding:10px 16px;border-radius:10px;transition:top .15s}
+.skip:focus{top:12px}
+/* ================= SCENE ================= */
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.sky{position:absolute;inset:0;background:linear-gradient(#0a0e2c 0%,#232a63 30%,#5b4a94 50%,#c76b98 62%,#ff9e6b 70%,#ffd9a0 74%,#ffd9a0 100%)}
+body[data-mode="night"] .sky{filter:brightness(.5) saturate(.8)}
+.stars{position:absolute;inset:0 0 45% 0;animation:twinkle 5s ease-in-out infinite alternate;background-image:
+ radial-gradient(1.5px 1.5px at 12% 18%,rgba(255,255,255,.9),transparent),radial-gradient(1px 1px at 28% 8%,rgba(255,255,255,.7),transparent),
+ radial-gradient(1.5px 1.5px at 44% 22%,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 61% 12%,rgba(255,255,255,.65),transparent),
+ radial-gradient(1.5px 1.5px at 78% 20%,rgba(255,255,255,.8),transparent),radial-gradient(1px 1px at 90% 9%,rgba(255,255,255,.7),transparent)}
+.sun{position:absolute;left:66%;top:60%;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,#fff7dc,#ffd77a 45%,rgba(255,180,90,0) 72%);filter:blur(2px);animation:sunPulse 7s ease-in-out infinite alternate}
+.mist{position:absolute;left:-12%;right:-12%;top:56%;height:20%;filter:blur(14px);background:radial-gradient(60% 100% at 30% 50%,rgba(255,255,255,.26),transparent 70%),radial-gradient(50% 100% at 76% 40%,rgba(255,255,255,.2),transparent 70%);animation:mistDrift 30s ease-in-out infinite alternate}
+.mountains{position:absolute;left:0;right:0;bottom:26%;height:36%;width:100%}
+.pines{position:absolute;bottom:25%;height:190px;width:230px}.pines.left{left:-30px}.pines.right{right:-30px;transform:scaleX(-1)}
+.lake{position:absolute;left:0;right:0;bottom:0;height:27%;background:linear-gradient(#ffd9a0,#d67e8e 30%,#4a3f86 72%,#232057)}
+.lake::before{content:"";position:absolute;inset:0;background:radial-gradient(46% 90% at 70% 0,rgba(255,222,150,.8),rgba(255,160,90,.28) 42%,transparent 72%)}
+.lake::after{content:"";position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(90deg,transparent 0 14px,rgba(255,255,255,.07) 14px 16px);animation:shimmer 9s linear infinite}
+.scene::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 190px rgba(5,5,22,.6)}
+body[data-mode="night"] .scene::after{box-shadow:inset 0 0 190px rgba(3,3,14,.85)}
+#sparks{position:absolute;inset:0;width:100%;height:100%}
+.shard{position:absolute;filter:drop-shadow(0 8px 14px rgba(16,12,56,.4));opacity:.7;background:linear-gradient(140deg,rgba(255,255,255,.9),rgba(160,200,255,.4) 45%,rgba(255,190,230,.35));animation:shardFloat 9s ease-in-out infinite alternate}
+.s1{left:14%;top:36%;width:54px;height:74px;clip-path:polygon(50% 0,100% 38%,78% 100%,18% 88%,0 34%)}
+.s2{right:13%;top:30%;width:40px;height:56px;clip-path:polygon(50% 0,100% 45%,62% 100%,0 70%);animation-delay:-3s}
+.s3{left:20%;bottom:22%;width:34px;height:46px;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);animation-delay:-5s}
+.s4{right:19%;bottom:26%;width:48px;height:64px;clip-path:polygon(40% 0,100% 30%,82% 100%,10% 82%);animation-delay:-7s}
+/* ================= SURFACES / CONTROLS ================= */
+.gd{background:var(--sf-dusk);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--sf-dusk-edge);border-radius:var(--r-lg);box-shadow:var(--shadow-d),inset 0 1px 0 rgba(255,255,255,.12)}
+.gl{background:var(--sf-light);-webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);border:1px solid transparent;border-radius:var(--r-lg);box-shadow:var(--shadow-d),inset 0 1px 0 rgba(255,255,255,.85);color:var(--lt-text);position:relative}
+.gl.rim::before{content:"";position:absolute;inset:-2px;border-radius:calc(var(--r-lg) + 2px);z-index:-1;background:var(--rim);filter:blur(1px);opacity:.85}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:46px;padding:0 20px;border:0;border-radius:13px;cursor:pointer;font:700 14.5px var(--font-b);transition:transform .12s,box-shadow .12s,background .12s;text-decoration:none}
+.btn:active{transform:translateY(1px)}
+.btn-p{color:var(--primary-ink);background:linear-gradient(180deg,var(--primary-a),var(--primary-b));box-shadow:0 10px 26px rgba(255,150,70,.35),inset 0 1px 0 rgba(255,255,255,.75)}
+.btn-p:hover{transform:translateY(-1px)}
+.btn-p:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-g{background:rgba(255,255,255,.1);border:1px solid var(--sf-dusk-edge);color:var(--dk-text)}
+.btn-g:hover{background:rgba(255,255,255,.18)}
+.btn-q{background:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.7);color:var(--lt-text)}
+.btn-q:hover{background:rgba(255,255,255,.72)}
+.btn-d{background:rgba(255,90,110,.14);border:1px solid rgba(255,120,140,.4);color:var(--danger)}
+.btn-d:hover{background:rgba(255,90,110,.24)}
+.btn-lg{height:54px;padding:0 26px;font-size:16px;font-family:var(--font-d);border-radius:16px}
+.linklike{border:0;background:none;cursor:pointer;color:var(--c-blue);text-decoration:underline;text-underline-offset:3px;font:600 13.5px var(--font-b);padding:4px 2px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font:700 11.5px var(--font-b);letter-spacing:.04em}
+.chip.active{background:rgba(90,214,160,.16);color:var(--ok);border:1px solid rgba(90,214,160,.4)}
+.chip.paused{background:rgba(255,208,138,.14);color:var(--primary-a);border:1px solid rgba(255,208,138,.4)}
+.chip.done{background:rgba(143,208,255,.14);color:var(--c-blue);border:1px solid rgba(143,208,255,.4)}
+.chip.sample{background:rgba(230,179,255,.12);color:var(--c-pink);border:1px solid rgba(230,179,255,.35)}
+/* fields (dark + light) */
+.field{position:relative}
+.field input,.field select{width:100%;height:50px;padding:0 16px;border-radius:var(--r-md);font:500 15px var(--font-b);color:var(--dk-text);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);transition:border-color .15s,box-shadow .15s}
+.field input::placeholder{color:var(--dk-faint)}
+.field input:focus,.field select:focus{outline:none;border-color:var(--primary-a);box-shadow:0 0 0 3px rgba(255,208,138,.22)}
+.field label{position:absolute;left:14px;top:50%;translate:0 -50%;color:var(--dk-muted);pointer-events:none;transition:all .16s}
+.field input:focus~label,.field input:not(:placeholder-shown)~label{top:0;left:10px;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:#241f52;padding:2px 7px;border-radius:6px}
+.on-light .field input{color:var(--lt-text);background:rgba(255,255,255,.52);border-color:rgba(255,255,255,.75);box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.on-light .field input:focus{border-color:#3b2fbf;box-shadow:0 0 0 3px rgba(59,47,191,.2)}
+.on-light .field label{color:var(--lt-muted)}
+.on-light .field input:focus~label,.on-light .field input:not(:placeholder-shown)~label{background:rgba(255,255,255,.95)}
+.on-light .field .icon{stroke:var(--lt-muted)}
+.field .icon{position:absolute;left:14px;top:50%;translate:0 -50%;stroke:var(--dk-muted);pointer-events:none}
+.field.has-icon input{padding-left:44px}
+.field.has-icon label{left:44px}
+.field.has-icon input:focus~label,.field.has-icon input:not(:placeholder-shown)~label{left:34px}
+.field.invalid input{border-color:var(--danger)}
+.err{display:flex;gap:6px;align-items:flex-start;margin-top:6px;font-size:13px;font-weight:600;color:var(--danger)}
+.on-light .err{color:var(--danger-ink)}
+.err .ic{width:15px;height:15px;margin-top:1px}
+/* switch */
+.sw{position:relative;display:inline-block;width:44px;height:25px;flex:none}
+.sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid var(--sf-dusk-edge);transition:background .15s}
+.sw i::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:#cfc9ef;transition:transform .15s}
+.sw input:checked+i{background:linear-gradient(180deg,var(--primary-a),var(--primary-b))}
+.sw input:checked+i::after{transform:translateX(19px);background:var(--primary-ink)}
+.sw input:focus-visible+i{outline:2px solid var(--focus-ring);outline-offset:2px}
+/* ================= MARKETING ================= */
+.mnav{position:sticky;top:12px;z-index:20;display:flex;align-items:center;gap:18px;margin:12px auto 0;padding:10px 16px;width:min(1120px,calc(100% - 28px));border-radius:18px}
+.brand{display:flex;align-items:center;gap:10px;font:700 17px var(--font-d);color:#fff;text-decoration:none}
+.brand .ic{width:26px;height:26px;stroke:url(#lg1)}
+.mnav .links{display:flex;gap:4px;margin-left:auto}
+.mnav .links a{color:var(--dk-muted);text-decoration:none;font:600 14px var(--font-b);padding:9px 12px;border-radius:10px}
+.mnav .links a:hover{color:#fff;background:rgba(255,255,255,.1)}
+.mnav .cta{display:flex;gap:10px;align-items:center}
+.nav-burger{display:none;margin-left:auto}
+.msheet{position:fixed;inset:0;z-index:40;background:rgba(8,7,26,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none}
+body.menu-open .msheet{display:block}
+.msheet .panel{position:absolute;right:12px;top:12px;width:min(300px,calc(100vw - 24px));padding:16px;display:grid;gap:6px}
+.msheet a,.msheet button{display:block;text-align:left;color:var(--dk-text);text-decoration:none;font:600 15px var(--font-b);padding:12px 14px;border-radius:12px;background:none;border:0;cursor:pointer}
+.msheet a:hover,.msheet button:hover{background:rgba(255,255,255,.1)}
+.wrap{position:relative;z-index:1;width:min(1120px,calc(100% - 28px));margin:0 auto}
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:72px 0 56px}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;font:700 11px var(--font-b);letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.eyebrow::before,.eyebrow::after{content:"";width:30px;height:1px;background:rgba(255,255,255,.5)}
+.hero h1{font:700 clamp(38px,5.4vw,62px)/1.05 var(--font-d);letter-spacing:-.02em;color:#fff;margin:16px 0 14px;text-shadow:0 2px 26px rgba(255,170,110,.4)}
+.hero p.sub{font-size:17px;line-height:1.6;color:var(--dk-muted);max-width:46ch}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 12px}
+.hero .note{font-size:12.5px;color:var(--dk-faint)}
+.hero-demo{padding:26px;transform-style:preserve-3d;perspective:1000px}
+.orb{width:110px;height:110px;margin:2px auto 16px;border-radius:50%;background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.95),rgba(190,220,255,.5) 34%,rgba(150,140,230,.35) 62%,rgba(120,110,220,.15));box-shadow:inset 0 -14px 26px rgba(120,90,220,.35),inset 0 10px 18px rgba(255,255,255,.7),0 18px 40px rgba(30,20,90,.4);animation:slabFloat 7s ease-in-out infinite}
+.hd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.hd-stat{padding:12px 10px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid var(--sf-dusk-edge);text-align:center}
+.hd-stat b{display:block;font:700 19px var(--font-d);color:#fff}
+.hd-stat span{font-size:11px;color:var(--dk-muted);letter-spacing:.06em;text-transform:uppercase}
+/* sections */
+.sec{padding:56px 0}
+.sec-head{max-width:60ch;margin-bottom:30px}
+.sec-head h2{font:700 clamp(26px,3.4vw,38px)/1.15 var(--font-d);color:#fff;letter-spacing:-.01em;margin:10px 0 10px}
+.sec-head p{color:var(--dk-muted);font-size:15.5px;line-height:1.6}
+.kicker{font:800 11px var(--font-b);letter-spacing:.24em;text-transform:uppercase;color:var(--primary-a)}
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.bento .gd{padding:24px}
+.b-a{grid-column:span 3;grid-row:span 2}
+.b-b{grid-column:span 3}
+.b-c{grid-column:span 3}
+.b-d{grid-column:span 2}
+.b-e{grid-column:span 2}
+.b-f{grid-column:span 2}
+.bento h3{font:700 18px var(--font-d);color:#fff;margin:12px 0 8px}
+.bento p{font-size:14px;line-height:1.6;color:var(--dk-muted)}
+.b-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.1);border:1px solid var(--sf-dusk-edge)}
+.b-ic .ic{width:20px;height:20px;stroke:var(--primary-a)}
+.mini-chart{display:flex;align-items:flex-end;gap:8px;height:96px;margin-top:18px}
+.mini-chart i{flex:1;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--primary-a),rgba(255,157,77,.25));opacity:.85}
+.mini-chart i:nth-child(2){background:linear-gradient(180deg,var(--c-blue),rgba(143,208,255,.2))}
+.mini-chart i:nth-child(4){background:linear-gradient(180deg,var(--c-pink),rgba(230,179,255,.2))}
+.kbd{display:inline-block;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,.12);border:1px solid var(--sf-dusk-edge);font:600 12px ui-monospace,monospace;color:var(--dk-text)}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:st}
+.step{padding:24px;position:relative}
+.step b.n{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;font:700 16px var(--font-d);color:var(--primary-ink);background:linear-gradient(180deg,var(--primary-a),var(--primary-b))}
+.step h3{font:700 17px var(--font-d);color:#fff;margin:14px 0 8px}
+.step p{font-size:14px;line-height:1.6;color:var(--dk-muted)}
+/* pricing */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch}
+.plan{padding:26px;display:flex;flex-direction:column;gap:14px}
+.plan h3{font:700 18px var(--font-d);color:#fff}
+.plan .price{font:700 38px var(--font-d);color:#fff}
+.plan .price small{font:600 13px var(--font-b);color:var(--dk-muted)}
+.plan ul{list-style:none;display:grid;gap:9px;font-size:14px;color:var(--dk-muted)}
+.plan ul li{display:flex;gap:9px;align-items:flex-start}
+.plan ul .ic{width:16px;height:16px;stroke:var(--ok);margin-top:2px}
+.plan .btn{margin-top:auto}
+.plan.featured{color:var(--lt-text)}
+.plan.featured h3,.plan.featured .price{color:var(--lt-text)}
+.plan.featured .price small,.plan.featured ul{color:var(--lt-muted)}
+.plan.featured ul .ic{stroke:var(--ok-ink)}
+.plan-tag{position:absolute;top:-12px;left:50%;translate:-50%;padding:4px 12px;border-radius:999px;font:800 11px var(--font-b);letter-spacing:.1em;text-transform:uppercase;color:var(--primary-ink);background:linear-gradient(180deg,var(--primary-a),var(--primary-b))}
+.pay-toggle{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:22px;font:600 14px var(--font-b);color:var(--dk-muted)}
+.pay-toggle b{color:#fff}
+/* faq */
+.faq{display:grid;gap:10px;max-width:760px;margin:0 auto}
+details.faq-i{padding:0;overflow:hidden}
+details.faq-i summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:18px 20px;font:700 15.5px var(--font-b);color:#fff}
+details.faq-i summary::-webkit-details-marker{display:none}
+details.faq-i summary .ic{margin-left:auto;stroke:var(--dk-muted);transition:transform .18s}
+details.faq-i[open] summary .ic{transform:rotate(180deg)}
+details.faq-i p{padding:0 20px 18px;font-size:14.5px;line-height:1.65;color:var(--dk-muted)}
+/* cta + footer */
+.cta-band{padding:36px;text-align:center;display:grid;gap:16px;justify-items:center}
+.cta-band h2{font:700 clamp(24px,3vw,32px) var(--font-d);color:#fff}
+.cta-band p{color:var(--dk-muted);max-width:52ch}
+footer{position:relative;z-index:1;border-top:1px solid rgba(255,255,255,.12);margin-top:40px;padding:36px 0 30px;background:rgba(8,7,26,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.f-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:28px}
+.f-grid h4{font:800 12px var(--font-b);letter-spacing:.18em;text-transform:uppercase;color:var(--dk-faint);margin-bottom:12px}
+.f-grid a,.f-grid button{display:block;color:var(--dk-muted);text-decoration:none;font:600 14px var(--font-b);padding:5px 0;background:none;border:0;cursor:pointer;text-align:left}
+.f-grid a:hover,.f-grid button:hover{color:#fff}
+.f-note{margin-top:26px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);font-size:12.5px;color:var(--dk-faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+/* ================= AUTH ================= */
+.auth{min-height:100svh;display:grid;place-items:center;padding:40px 18px;position:relative;z-index:1}
+.slab{width:min(410px,100%);padding:32px 28px 26px}
+.screw{position:absolute;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#cfd6e6 40%,#8b93a8 72%,#5a6178);box-shadow:inset 0 -1px 2px rgba(0,0,0,.45),0 1px 2px rgba(255,255,255,.7)}
+.screw::after{content:"";position:absolute;left:2px;right:2px;top:50%;height:1.5px;margin-top:-.75px;background:rgba(40,44,60,.65);transform:rotate(45deg)}
+.screw.tl{top:11px;left:11px}.screw.tr{top:11px;right:11px}.screw.bl{bottom:11px;left:11px}.screw.br{bottom:11px;right:11px}
+.medal{width:74px;height:74px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,.45));box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 18px rgba(20,16,60,.28);position:relative}
+.medal::before{content:"";position:absolute;inset:-3px;border-radius:50%;background:conic-gradient(#9fd8ff,#e6b3ff,#ffe3b3,#9fd8ff);opacity:.8;filter:blur(2px);z-index:-1}
+.medal .ic{width:32px;height:32px;stroke:var(--lt-muted)}
+.auth h1{font:700 24px var(--font-d);text-align:center;color:var(--lt-text)}
+.auth .sub2{text-align:center;font-size:13.5px;color:var(--lt-muted);margin:6px 0 20px}
+.auth form{display:grid;gap:14px}
+.auth .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.auth .row label{display:flex;gap:8px;align-items:center;font:600 13.5px var(--font-b);color:var(--lt-muted)}
+.auth .row input[type=checkbox]{width:17px;height:17px;accent-color:#3b2fbf}
+.auth .swap{text-align:center;font-size:13.5px;color:var(--lt-muted);margin-top:14px}
+.auth .swap a{color:#3b2fbf;font-weight:700}
+.auth .fineprint{margin-top:12px;text-align:center;font-size:11.5px;color:var(--ink-faint)}
+.toggle-pass{position:absolute;right:8px;top:50%;translate:0 -50%;width:36px;height:36px;border:0;border-radius:10px;background:none;cursor:pointer;display:grid;place-items:center}
+.toggle-pass:hover{background:rgba(255,255,255,.5)}
+.toggle-pass .ic{stroke:var(--lt-muted)}
+.shake{animation:shake .4s ease}
+/* ================= APP SHELL ================= */
+.app{position:relative;z-index:1;display:grid;grid-template-columns:250px 1fr;min-height:100svh;gap:16px;padding:16px;width:min(1400px,100%);margin:0 auto}
+.sidebar{padding:16px 12px;display:flex;flex-direction:column;gap:4px;border-radius:20px;align-self:start;position:sticky;top:16px;height:calc(100svh - 32px)}
+.sidebar .brand{padding:6px 10px 14px}
+.snav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;color:var(--dk-muted);text-decoration:none;font:600 14.5px var(--font-b)}
+.snav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.snav a[aria-current="page"]{background:rgba(255,255,255,.13);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.snav a[aria-current="page"] .ic{stroke:var(--primary-a)}
+.sidebar .sp{flex:1}
+.uchip{display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid var(--sf-dusk-edge);cursor:pointer;width:100%;text-align:left}
+.uchip:hover{background:rgba(255,255,255,.13)}
+.avatar{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font:800 13px var(--font-b);color:var(--primary-ink);background:linear-gradient(180deg,var(--primary-a),var(--primary-b))}
+.uchip b{display:block;font:700 13.5px var(--font-b);color:#fff}
+.uchip span{font-size:11.5px;color:var(--dk-faint)}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:18px;position:sticky;top:16px;z-index:15}
+.topbar h1{font:700 18px var(--font-d);color:#fff;margin-right:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tsearch{position:relative;width:min(280px,32vw)}
+.tsearch input{height:40px;width:100%;padding:0 12px 0 38px;border-radius:11px;background:rgba(255,255,255,.08);border:1px solid var(--sf-dusk-edge);color:var(--dk-text);font:500 14px var(--font-b)}
+.tsearch input:focus{outline:none;border-color:var(--primary-a)}
+.tsearch .ic{position:absolute;left:11px;top:50%;translate:0 -50%;stroke:var(--dk-faint);width:17px;height:17px}
+.iconbtn{position:relative;width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:11px;border:1px solid var(--sf-dusk-edge);background:rgba(255,255,255,.07);cursor:pointer;color:var(--dk-muted)}
+.iconbtn:hover{background:rgba(255,255,255,.14);color:#fff}
+.badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;display:grid;place-items:center;font:800 10.5px var(--font-b);color:var(--primary-ink);background:linear-gradient(180deg,var(--primary-a),var(--primary-b))}
+.burger{display:none}
+.pop{position:absolute;right:0;top:calc(100% + 8px);width:min(330px,calc(100vw - 32px));padding:14px;z-index:30;display:none}
+.pop.open{display:block}
+.pop h3{font:700 14px var(--font-b);color:#fff;display:flex;align-items:center;margin-bottom:10px}
+.pop h3 button{margin-left:auto}
+.notif{display:flex;gap:10px;padding:10px;border-radius:12px;font-size:13.5px;color:var(--dk-muted)}
+.notif.unread{background:rgba(255,255,255,.08);color:var(--dk-text)}
+.notif .dot{width:8px;height:8px;flex:none;margin-top:5px;border-radius:50%;background:var(--primary-a)}
+.notif.read .dot{background:transparent;box-shadow:inset 0 0 0 1px var(--dk-faint)}
+.notif time{display:block;font-size:11px;color:var(--dk-faint);margin-top:3px}
+.page{padding:4px 2px 30px;display:grid;gap:16px;align-content:start}
+.panels{display:grid;gap:16px}
+.panel{padding:20px;border-radius:20px}
+.panel h2{font:700 15.5px var(--font-d);color:#fff;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.panel h2 .chip{margin-left:auto}
+.muted{color:var(--dk-muted);font-size:13.5px}
+/* dashboard */
+.dash{grid-template-columns:1.55fr 1fr}
+.dash .col{display:grid;gap:16px;align-content:start}
+.task-add{display:flex;gap:10px;margin-bottom:12px}
+.task-add input{flex:1;height:44px;padding:0 14px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--sf-dusk-edge);color:var(--dk-text);font:500 14.5px var(--font-b)}
+.task-add input:focus{outline:none;border-color:var(--primary-a)}
+.tasks{list-style:none;display:grid;gap:8px}
+.tasks li{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid transparent}
+.tasks li:hover{border-color:var(--sf-dusk-edge)}
+.tasks input[type=checkbox]{width:18px;height:18px;accent-color:var(--primary-b);cursor:pointer;flex:none}
+.tasks .t{flex:1;font-size:14.5px;color:var(--dk-text)}
+.tasks li.done .t{text-decoration:line-through;color:var(--dk-faint)}
+.tasks .due{font-size:11.5px;color:var(--dk-faint)}
+.tasks .del{width:30px;height:30px;border:0;border-radius:8px;background:none;cursor:pointer;color:var(--dk-faint);display:grid;place-items:center}
+.tasks .del:hover{color:var(--danger);background:rgba(255,90,110,.12)}
+.empty{padding:26px 16px;text-align:center;color:var(--dk-faint);font-size:13.5px;display:grid;gap:8px;justify-items:center}
+.statrow{display:flex;align-items:baseline;gap:10px;padding:12px 2px;border-bottom:1px solid rgba(255,255,255,.09)}
+.statrow:last-child{border:0;padding-bottom:2px}
+.statrow b{font:700 24px var(--font-d);color:#fff}
+.statrow .lbl{font-size:13px;color:var(--dk-muted);flex:1}
+.delta{font:700 12px var(--font-b);padding:3px 8px;border-radius:999px}
+.delta.up{color:var(--ok);background:rgba(90,214,160,.14)}
+.delta.dn{color:var(--danger);background:rgba(255,90,110,.14)}
+.feed{list-style:none;display:grid;gap:12px;font-size:13.5px;color:var(--dk-muted)}
+.feed li{display:flex;gap:10px}
+.feed .ic{width:16px;height:16px;margin-top:2px;stroke:var(--c-blue)}
+.chart-wrap{position:relative}
+.chart-wrap svg{width:100%;height:auto;display:block}
+.readout{font:600 12.5px var(--font-b);color:var(--dk-muted);min-height:18px}
+.bar{fill:url(#gb);rx:5;transition:opacity .12s}
+.bar:hover{opacity:.75}
+/* projects table */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar select{height:40px;padding:0 12px;border-radius:11px;background:rgba(255,255,255,.08);border:1px solid var(--sf-dusk-edge);color:var(--dk-text);font:600 13.5px var(--font-b)}
+.toolbar .count{margin-left:auto;font-size:12.5px;color:var(--dk-faint)}
+.twrap{overflow-x:auto;border-radius:14px;border:1px solid var(--sf-dusk-edge)}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{padding:12px 14px;text-align:left;font-size:14px}
+th{font:800 11px var(--font-b);letter-spacing:.12em;text-transform:uppercase;color:var(--dk-faint);border-bottom:1px solid var(--sf-dusk-edge);white-space:nowrap}
+th button{background:none;border:0;cursor:pointer;font:inherit;color:inherit;display:inline-flex;gap:6px;align-items:center;padding:2px}
+th button:hover{color:#fff}
+td{border-bottom:1px solid rgba(255,255,255,.07);color:var(--dk-muted)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(255,255,255,.06)}
+tbody tr:last-child td{border-bottom:0}
+td.name{color:#fff;font-weight:700}
+.prog{width:110px;height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary-a),var(--primary-b))}
+body.dense td,body.dense th{padding:8px 12px;font-size:13px}
+.bulkbar{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:14px;background:rgba(255,208,138,.12);border:1px solid rgba(255,208,138,.4);font:600 13.5px var(--font-b);color:var(--primary-a)}
+.skel{height:16px;border-radius:6px;background:linear-gradient(90deg,rgba(255,255,255,.07),rgba(255,255,255,.16),rgba(255,255,255,.07));background-size:200% 100%;animation:sk 1.1s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+/* analytics */
+.tabs{display:inline-flex;gap:4px;padding:4px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid var(--sf-dusk-edge)}
+.tabs button{border:0;background:none;cursor:pointer;padding:8px 14px;border-radius:9px;font:700 13px var(--font-b);color:var(--dk-muted)}
+.tabs button[aria-selected="true"]{background:rgba(255,255,255,.15);color:#fff}
+.breakdown{display:grid;gap:14px}
+.bd .lbl{display:flex;justify-content:space-between;font-size:13.5px;color:var(--dk-muted);margin-bottom:6px}
+.bd .lbl b{color:#fff}
+.bd .prog{width:100%}
+/* settings */
+.set-grid{display:grid;gap:16px;max-width:720px}
+.set-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.09)}
+.set-row:last-child{border:0}
+.set-row .txt{flex:1}
+.set-row .txt b{display:block;font:700 14.5px var(--font-b);color:#fff}
+.set-row .txt span{font-size:12.5px;color:var(--dk-faint)}
+.swatches{display:flex;gap:10px}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid transparent;cursor:pointer}
+.swatch[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.sw-sunset{background:linear-gradient(135deg,#ffd08a,#ff9d4d)}
+.sw-glacier{background:linear-gradient(135deg,#bfe3ff,#6fb6f2)}
+.sw-orchid{background:linear-gradient(135deg,#f0d0ff,#cf8df2)}
+/* dialogs + toasts */
+dialog{border:0;border-radius:20px;padding:26px;max-width:420px;width:calc(100vw - 44px);color:var(--dk-text);background:linear-gradient(165deg,rgba(38,33,82,.92),rgba(20,17,50,.9));-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:var(--shadow-d)}
+dialog::backdrop{background:rgba(6,5,20,.6);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+dialog h2{font:700 18px var(--font-d);color:#fff;margin-bottom:8px}
+dialog p{font-size:14px;color:var(--dk-muted);margin-bottom:14px;line-height:1.55}
+dialog .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+dialog form{display:grid;gap:14px}
+#toasts{position:fixed;right:16px;bottom:16px;z-index:60;display:grid;gap:10px;width:min(340px,calc(100vw - 32px))}
+.toast{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;border-radius:14px;background:rgba(28,24,64,.92);border:1px solid var(--sf-dusk-edge);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:var(--shadow-d);font-size:13.5px;color:var(--dk-text);animation:popIn .25s ease-out}
+.toast .ic{margin-top:1px}
+.toast.ok .ic{stroke:var(--ok)}.toast.err .ic{stroke:var(--danger)}.toast.info .ic{stroke:var(--c-blue)}
+.toast button{margin-left:auto;background:none;border:0;cursor:pointer;color:var(--dk-faint);display:grid;place-items:center}
+/* 404 */
+.nf{min-height:100svh;display:grid;place-items:center;text-align:center;position:relative;z-index:1;padding:30px}
+.nf h1{font:700 64px var(--font-d);color:#fff}
+.nf p{color:var(--dk-muted);margin:10px 0 22px}
+/* ================= RESPONSIVE ================= */
+@media (max-width:1020px){
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .b-a,.b-b,.b-c,.b-d,.b-e,.b-f{grid-column:span 1;grid-row:auto}
+  .dash{grid-template-columns:1fr}
+}
+@media (max-width:960px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:12px;top:12px;bottom:12px;width:262px;z-index:45;transform:translateX(-115%);transition:transform .2s;height:auto}
+  body.nav-open .sidebar{transform:none}
+  .burger{display:grid}
+  .scrim{position:fixed;inset:0;z-index:40;background:rgba(6,5,20,.5);display:none}
+  body.nav-open .scrim{display:block}
+}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:34px;padding-top:44px}
+  .mnav .links,.mnav .cta .btn-g{display:none}
+  .nav-burger{display:grid}
+  .steps,.plans{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:720px){
+  .shard{display:none}
+  .pines{height:140px;width:170px}
+  .tsearch{display:none}
+  body.search-open .tsearch{display:block;position:absolute;left:12px;right:12px;top:calc(100% + 8px);width:auto;z-index:20}
+  .f-grid{grid-template-columns:1fr}
+  .hd-stats{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:440px){
+  .slab{padding:26px 18px 20px}
+  .panel{padding:16px}
+  .topbar .btn-p span.lbl{display:none}
+}
+/* ================= MOTION ================= */
+@keyframes slabFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes twinkle{from{opacity:.55}to{opacity:1}}
+@keyframes sunPulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+@keyframes mistDrift{from{transform:translateX(-3%)}to{transform:translateX(3%)}}
+@keyframes shimmer{from{background-position:0 0}to{background-position:280px 0}}
+@keyframes shardFloat{from{transform:translateY(-8px) rotate(-4deg)}to{transform:translateY(10px) rotate(6deg)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes popIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+body.force-reduced *,body.force-reduced *::before,body.force-reduced *::after{animation:none!important;transition:none!important}
+body.force-reduced html{scroll-behavior:auto}
+</style>
+</head>
+<body data-mode="day">
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fd8ff"/><stop offset=".5" stop-color="#e6b3ff"/><stop offset="1" stop-color="#ffd08a"/></linearGradient>
+  <linearGradient id="gb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd08a"/><stop offset="1" stop-color="rgba(255,157,77,.25)"/></linearGradient>
+  <linearGradient id="gl2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fd0ff"/><stop offset="1" stop-color="rgba(143,208,255,.15)"/></linearGradient></defs>
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M12 3 21 19H3Z"/><path d="M12 3v16M7.5 11h9"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M18.5 5.5l-2.1 2.1M7.6 16.4l-2.1 2.1"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 5v2M6.5 7l1 13h9l1-13"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 4h-8a1.5 1.5 0 0 0-1.5 1.5v13A1.5 1.5 0 0 0 6 20h8M18 8l4 4-4 4M22 12H10"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5c2 0 3.7.6 5.2 1.5M22 12s-3.6 6.5-10 6.5c-2 0-3.7-.6-5.2-1.5"/><path d="M4 20 20 4"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M4 19h16"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2Z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></symbol>
+</svg>
+
+<div class="scene" aria-hidden="true">
+  <div class="sky"></div><div class="stars"></div><div class="sun"></div><div class="mist"></div>
+  <svg class="mountains" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="#6f5fa8" opacity=".75" d="M0 230 120 150 240 205 360 118 480 195 620 96 760 185 900 128 1040 195 1180 140 1320 205 1440 158V320H0Z"/>
+    <path fill="#221c4e" d="M0 268 150 190 300 250 470 160 640 245 820 170 990 250 1160 185 1320 252 1440 205V320H0Z"/>
+    <path fill="#e8ecff" opacity=".9" d="M470 160l34 20-16 6-18-12-16 12-16-7zM820 170l30 18-14 6-16-11-14 11-14-6z"/>
+  </svg>
+  <svg class="pines left" viewBox="0 0 230 190"><g fill="#0c1226"><path d="M60 190V96M60 96l-26 40h14l-20 32h16l-24 34h80l-24-34h16l-20-32h14z"/><path d="M140 190V120M140 120l-20 32h11l-16 26h13l-19 28h62l-19-28h13l-16-26h11z"/><path d="M205 190V140M205 140l-15 24h8l-12 20h10l-14 22h46l-14-22h10l-12-20h8z"/></g></svg>
+  <svg class="pines right" viewBox="0 0 230 190"><g fill="#0c1226"><path d="M60 190V96M60 96l-26 40h14l-20 32h16l-24 34h80l-24-34h16l-20-32h14z"/><path d="M150 190V126M150 126l-19 30h10l-15 25h12l-18 27h60l-18-27h12l-15-25h10z"/></g></svg>
+  <div class="lake"></div>
+  <div class="shard s1"></div><div class="shard s2"></div><div class="shard s3"></div><div class="shard s4"></div>
+  <canvas id="sparks"></canvas>
+</div>
+
+<div id="root"></div>
+<div id="toasts" role="status" aria-live="polite"></div>
+
+<!-- shared dialogs -->
+<dialog id="dlg-confirm" aria-labelledby="cf-title">
+  <h2 id="cf-title">Are you sure?</h2>
+  <p id="cf-msg"></p>
+  <div class="acts"><button class="btn btn-g" type="button" data-action="cf-cancel">Cancel</button><button class="btn btn-d" type="button" data-action="cf-ok">Confirm</button></div>
+</dialog>
+<dialog id="dlg-task" aria-labelledby="tk-title">
+  <h2 id="tk-title">New task</h2>
+  <form id="task-form" novalidate>
+    <div class="field"><input id="tk-name" placeholder=" " maxlength="80"><label for="tk-name">Task title</label></div>
+    <p class="err" id="tk-err" hidden><svg class="ic"><use href="#i-alert"/></svg><span></span></p>
+    <div class="acts"><button class="btn btn-g" type="button" data-action="tk-cancel">Cancel</button><button class="btn btn-p" type="submit">Add task</button></div>
+  </form>
+</dialog>
+<dialog id="dlg-project" aria-labelledby="pj-title">
+  <h2 id="pj-title"></h2>
+  <p id="pj-body"></p>
+  <div class="acts"><button class="btn btn-g" type="button" data-action="pj-close">Close</button></div>
+</dialog>
+<dialog id="dlg-forgot" aria-labelledby="fg-title">
+  <h2 id="fg-title">Reset your password</h2>
+  <p>This is a front-end demo, so password reset isn't wired to a server and no email will be sent. In a production build this would email you a secure reset link.</p>
+  <div class="acts"><button class="btn btn-p" type="button" data-action="fg-close">Got it</button></div>
+</dialog>
+
+<script>
+"use strict";
+/* =============== STORE =============== */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem("ap."+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("ap."+k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem("ap."+k); }catch(e){} }
+};
+function seed(){
+  if (!LS.get("v", null)){
+    LS.set("tasks", [
+      {id:1, title:"Review glass refraction pass on hero panel", done:false, due:"Today"},
+      {id:2, title:"Fix contrast on muted table text", done:false, due:"Today"},
+      {id:3, title:"Write pricing copy for demo tiers", done:true, due:"Yesterday"},
+      {id:4, title:"Audit keyboard flow through auth slab", done:false, due:"Jun 14"},
+      {id:5, title:"Export analytics CSV sample", done:true, due:"Jun 12"}
+    ]);
+    LS.set("projects", [
+      {id:1, name:"Aurora onboarding", status:"Active", owner:"R. Mehta", due:"Jun 21", progress:72},
+      {id:2, name:"Frost design tokens", status:"Active", owner:"L. Chen", due:"Jun 18", progress:54},
+      {id:3, name:"Mobile nav reflow", status:"Paused", owner:"S. Ibarra", due:"Jul 02", progress:31},
+      {id:4, name:"Analytics export", status:"Done", owner:"R. Mehta", due:"Jun 06", progress:100},
+      {id:5, name:"Settings IA cleanup", status:"Active", owner:"T. Okafor", due:"Jun 27", progress:46},
+      {id:6, name:"Reduced-motion audit", status:"Done", owner:"L. Chen", due:"May 30", progress:100}
+    ]);
+    LS.set("notifs", [
+      {id:1, text:"L. Chen commented on “Frost design tokens”.", time:"12 min ago", read:false},
+      {id:2, text:"Weekly focus report is ready to view.", time:"2 h ago", read:false},
+      {id:3, text:"Demo data seeded in this browser.", time:"Just now", read:true}
+    ]);
+    LS.set("prefs", {accent:"sunset", dense:false, reduced:false});
+    LS.set("v", 1);
+  }
+}
+seed();
+const state = {
+  session: LS.get("session", null),
+  plan: LS.get("plan", "Starter"),
+  q: "", status: "All", sort: {key:"name", dir:1},
+  sel: new Set(), range: 7, projectsLoaded: false,
+  prefs: LS.get("prefs", {accent:"sunset", dense:false, reduced:false})
+};
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ic = (n, cls) => `<svg class="ic ${cls||""}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+
+/* =============== TOASTS =============== */
+function toast(msg, kind){
+  kind = kind || "info";
+  const el = document.createElement("div");
+  el.className = "toast " + kind;
+  el.innerHTML = `${ic(kind==="ok"?"check":kind==="err"?"alert":"spark")}<span>${esc(msg)}</span><button aria-label="Dismiss notification">${ic("x")}</button>`;
+  el.querySelector("button").onclick = () => el.remove();
+  $("#toasts").appendChild(el);
+  setTimeout(() => el.remove(), 4600);
+}
+/* =============== CONFIRM =============== */
+let cfCb = null;
+function confirmDlg(msg, cb){ $("#cf-msg").textContent = msg; cfCb = cb; $("#dlg-confirm").showModal(); }
+
+/* =============== CHARTS =============== */
+function seriesFor(days){
+  const out = []; const now = Date.now();
+  for (let i = days - 1; i >= 0; i--){
+    const d = new Date(now - i*864e5);
+    const v = Math.round(34 + 26*Math.sin((days-i)/3.1 + days%5) + ((i*7)%13));
+    out.push({date: d.toISOString().slice(5,10), v: Math.max(6, v)});
+  }
+  return out;
+}
+function barSVG(data){
+  const max = Math.max(...data.map(d=>d.v)), n = data.length;
+  const bw = 100/n;
+  let r = "";
+  data.forEach((d,i)=>{
+    const h = (d.v/max)*88;
+    r += `<rect class="bar" data-v="${d.v}" data-l="${d.date}" x="${(i*bw+bw*0.18).toFixed(2)}" y="${(96-h).toFixed(2)}" width="${(bw*0.64).toFixed(2)}" height="${h.toFixed(2)}" rx="4"><title>${d.date}: ${d.v} focused min</title></rect>`;
+  });
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="height:150px" role="img" aria-label="Bar chart of focused minutes per day">${r}</svg>`;
+}
+function lineSVG(data){
+  const max = Math.max(...data.map(d=>d.v)), min = Math.min(...data.map(d=>d.v));
+  const pts = data.map((d,i)=>[ (i/(data.length-1))*100, 92 - ((d.v-min)/(max-min||1))*80 ]);
+  const path = pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" ");
+  const area = path + ` L100 100 L0 100 Z`;
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="height:190px" role="img" aria-label="Line chart of focused minutes per day">
+    <path d="${area}" fill="url(#gl2)" opacity=".5"/><path d="${path}" fill="none" stroke="#8fd0ff" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+    ${pts.filter((_,i)=>i%Math.ceil(data.length/8)===0).map(p=>`<circle cx="${p[0].toFixed(2)}" cy="${p[1].toFixed(2)}" r="1.6" fill="#edeaff"/>`).join("")}</svg>`;
+}
+
+/* =============== VIEWS =============== */
+function navMarketing(){
+  return `<nav class="mnav gd" aria-label="Main">
+    <a class="brand" href="#/">${ic("logo")} Alpenglow</a>
+    <div class="links">
+      <a href="#features">Features</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+    </div>
+    <div class="cta">
+      <a class="btn btn-g" href="#/login">Sign in</a>
+      <a class="btn btn-p" href="#/signup">Get started</a>
+      <button class="iconbtn nav-burger" data-action="menu-open" aria-label="Open menu">${ic("menu")}</button>
+    </div>
+  </nav>
+  <div class="msheet" data-action="menu-close"><div class="panel gd" role="dialog" aria-label="Menu">
+    <a href="#features">Features</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+    <a href="#/login">Sign in</a><a href="#/signup">Get started</a>
+    <button data-action="menu-close2">${ic("x")} Close</button>
+  </div></div>`;
+}
+function footerV(){
+  return `<footer><div class="wrap"><div class="f-grid">
+    <div><a class="brand" href="#/">${ic("logo")} Alpenglow</a>
+      <p class="muted" style="margin-top:12px;max-width:34ch">A liquid-glass workspace demo. One HTML file, no server, no tracking.</p></div>
+    <div><h4>Explore</h4><a href="#features">Features</a><a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></div>
+    <div><h4>Account</h4><a href="#/login">Sign in</a><a href="#/signup">Create account</a><a href="#/app">Open workspace</a></div>
+  </div>
+  <div class="f-note"><span>Demo build — everything you enter stays in this browser (localStorage).</span><span>© 2024 Alpenglow demo</span></div>
+  </div></footer>`;
+}
+function viewLanding(){
+  document.body.dataset.mode = "day";
+  const p = {Starter:[0,0], Pro:[12,96], Studio:[29,232]};
+  return navMarketing() + `<main id="main" class="wrap">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Liquid glass workspace</span>
+      <h1>Plan calmly.<br>Ship in clear layers.</h1>
+      <p class="sub">Alpenglow puts tasks, projects and focus analytics behind one frosted surface — so the work stays in front and the chrome recedes.</p>
+      <div class="cta">
+        <a class="btn btn-p btn-lg" href="#/signup">Start free demo ${ic("arrow")}</a>
+        <a class="btn btn-g btn-lg" href="#/login">Try the workspace</a>
+      </div>
+      <p class="note">No card, no server. The whole product runs in this page.</p>
+    </div>
+    <div class="hero-demo gd" id="tiltbox">
+      <div class="orb"></div>
+      <div class="readout" style="text-align:center">This week’s focus</div>
+      ${barSVG(seriesFor(7))}
+      <div class="hd-stats">
+        <div class="hd-stat"><b>18</b><span>Tasks</span></div>
+        <div class="hd-stat"><b>6</b><span>Projects</span></div>
+        <div class="hd-stat"><b>4.2h</b><span>Focus/day</span></div>
+      </div>
+      <p class="muted" style="text-align:center;margin-top:10px;font-size:11.5px">Sample data — live numbers appear after sign-in</p>
+    </div>
+  </section>
+
+  <section class="sec" id="features">
+    <div class="sec-head"><span class="kicker">Features</span><h2>Everything the demo actually does</h2>
+    <p>No vaporware bullets. Each panel below maps to a screen you can open in the workspace right now.</p></div>
+    <div class="bento">
+      <div class="gd b-a">${`<div class="b-ic">${ic("check")}</div>`}<h3>Tasks with real states</h3>
+        <p>Add, complete and delete tasks from the dashboard. Empty, done and partially-done lists all render differently, and your list persists in this browser.</p>
+        <div class="mini-chart"><i style="height:40%"></i><i style="height:66%"></i><i style="height:52%"></i><i style="height:88%"></i><i style="height:60%"></i><i style="height:74%"></i></div></div>
+      <div class="gd b-b">${`<div class="b-ic">${ic("folder")}</div>`}<h3>Projects table</h3>
+        <p>Sort by column, filter by status, search from the top bar, select rows for bulk complete or delete, and open any row for detail.</p></div>
+      <div class="gd b-c">${`<div class="b-ic">${ic("chart")}</div>`}<h3>Focus analytics</h3>
+        <p>Switch 7 / 30 / 90-day ranges and export exactly what the chart shows as CSV.</p></div>
+      <div class="gd b-d">${`<div class="b-ic">${ic("bell")}</div>`}<h3>Notifications</h3><p>A working inbox with unread state and mark-all-read.</p></div>
+      <div class="gd b-e">${`<div class="b-ic">${ic("gear")}</div>`}<h3>Preferences</h3><p>Accent, table density and reduced-motion — applied live.</p></div>
+      <div class="gd b-f">${`<div class="b-ic">${ic("spark")}</div>`}<h3>Keyboard first</h3><p>Every control is reachable. Press <span class="kbd">Tab</span> and try it.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="how">
+    <div class="sec-head"><span class="kicker">How it works</span><h2>Three steps, no backend</h2></div>
+    <div class="steps">
+      <div class="gd step"><b class="n">1</b><h3>Create a local account</h3><p>Sign-up validates in the browser and stores a session object in localStorage. Nothing is transmitted.</p></div>
+      <div class="gd step"><b class="n">2</b><h3>Work the workspace</h3><p>Dashboard, projects, analytics and settings share one design system: same fields, buttons, dialogs and toasts everywhere.</p></div>
+      <div class="gd step"><b class="n">3</b><h3>Reset anytime</h3><p>Settings → Data clears the demo store and re-seeds it, so you can hand the page to someone else clean.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="pricing">
+    <div class="sec-head" style="text-align:center;margin-inline:auto"><span class="kicker">Pricing</span><h2>Demo pricing — no checkout exists</h2>
+    <p>Picking a plan only pre-fills the sign-up form so you can see the flow.</p></div>
+    <div class="pay-toggle"><b>Monthly</b><label class="sw"><input type="checkbox" id="pay-toggle" aria-label="Bill yearly"><i></i></label><b>Yearly <span class="chip done">2 months free</span></b></div>
+    <div class="plans">
+      <div class="gd plan"><h3>Starter</h3><div class="price" data-m="0" data-y="0">$0<small> /mo</small></div>
+        <ul><li>${ic("check")} Tasks & dashboard</li><li>${ic("check")} 3 projects</li><li>${ic("check")} Local storage only</li></ul>
+        <button class="btn btn-g" data-action="pick-plan" data-plan="Starter">Choose Starter</button></div>
+      <div class="gl rim plan featured" style="position:relative"><span class="plan-tag">Most picked</span><h3>Pro</h3>
+        <div class="price" data-m="12" data-y="96">$12<small> /mo</small></div>
+        <ul><li>${ic("check")} Unlimited projects</li><li>${ic("check")} Focus analytics + CSV export</li><li>${ic("check")} Preferences & accents</li></ul>
+        <button class="btn btn-p" data-action="pick-plan" data-plan="Pro">Choose Pro</button></div>
+      <div class="gd plan"><h3>Studio</h3><div class="price" data-m="29" data-y="232">$29<small> /mo</small></div>
+        <ul><li>${ic("check")} Everything in Pro</li><li>${ic("check")} Shared workspaces (not in demo)</li><li>${ic("check")} Priority support (not in demo)</li></ul>
+        <button class="btn btn-g" data-action="pick-plan" data-plan="Studio">Choose Studio</button></div>
+    </div>
+  </section>
+
+  <section class="sec" id="faq">
+    <div class="sec-head" style="text-align:center;margin-inline:auto"><span class="kicker">FAQ</span><h2>Straight answers</h2></div>
+    <div class="faq">
+      <details class="faq-i gd"><summary>Is this a real product?<svg class="ic"><use href="#i-chev"/></svg></summary><p>No. It’s a complete front-end demo in a single HTML file, built to show a glass UI system across marketing, auth and app screens.</p></details>
+      <details class="faq-i gd"><summary>Where is my data stored?<svg class="ic"><use href="#i-chev"/></svg></summary><p>Only in your browser’s localStorage, under keys prefixed <span class="kbd">ap.</span>. No network requests are made besides the Google Fonts stylesheet.</p></details>
+      <details class="faq-i gd"><summary>Does login connect to a server?<svg class="ic"><use href="#i-chev"/></svg></summary><p>No. Sign-in validates locally (username 3+ chars, password 6+ chars) and creates a local session. The UI says so at the point of use.</p></details>
+      <details class="faq-i gd"><summary>Which browsers support the glass effect?<svg class="ic"><use href="#i-chev"/></svg></summary><p>Any browser with <span class="kbd">backdrop-filter</span> (all current evergreen browsers). Without it, surfaces fall back to translucent fills and stay readable.</p></details>
+      <details class="faq-i gd"><summary>How do I reset the demo?<svg class="ic"><use href="#i-chev"/></svg></summary><p>Settings → Data → Reset demo data, or clear site data for this page in your browser.</p></details>
+    </div>
+  </section>
+
+  <section class="sec"><div class="gd rim cta-band" style="position:relative">
+    <h2>See the whole workspace in one click</h2>
+    <p>Sign in with any credentials to explore the dashboard, projects table, analytics and settings.</p>
+    <a class="btn btn-p btn-lg" href="#/login">Open the workspace ${ic("arrow")}</a>
+  </div></section>
+  </main>` + footerV();
+}
+function authView(mode){
+  document.body.dataset.mode = "day";
+  const login = mode === "login";
+  return `<main id="main" class="auth on-light">
+    <section class="slab gl rim" aria-labelledby="auth-title">
+      <span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>
+      <div class="medal">${ic("user")}</div>
+      <h1 id="auth-title" tabindex="-1">${login ? "Welcome back" : "Create your account"}</h1>
+      <p class="sub2">${login ? "Sign in to open the workspace." : "Local demo account — nothing leaves this browser."}</p>
+      <form id="auth-form" novalidate data-mode="${mode}">
+        ${login ? "" : `<div class="field has-icon">${ic("user","icon")}<input id="a-name" placeholder=" " autocomplete="name"><label for="a-name">Full name</label>
+          <p class="err" id="e-name" hidden>${ic("alert")}<span></span></p></div>`}
+        <div class="field has-icon">${ic("mail","icon")}<input id="a-user" placeholder=" " autocomplete="username"><label for="a-user">${login?"Username or email":"Email"}</label>
+          <p class="err" id="e-user" hidden>${ic("alert")}<span></span></p></div>
+        <div class="field has-icon">${ic("lock","icon")}<input id="a-pass" type="password" placeholder=" " autocomplete="${login?"current-password":"new-password"}" style="padding-right:50px"><label for="a-pass">Password</label>
+          <button type="button" class="toggle-pass" data-action="toggle-pass" aria-label="Show password" aria-pressed="false">${ic("eye")}${ic("eyeoff")}</button>
+          <p class="err" id="e-pass" hidden>${ic("alert")}<span></span></p></div>
+        ${login ? `<div class="row"><label><input type="checkbox" checked> Remember me</label><button type="button" class="linklike" data-action="forgot">Forgot password?</button></div>
+          <button class="btn btn-p btn-lg" type="submit" id="auth-btn"><span id="auth-lbl">Log in</span> ${ic("arrow")}</button>
+          <button class="btn btn-q" type="button" data-action="demo-fill">Use demo credentials</button>
+          <p class="swap">No account? <a href="#/signup">Create one</a></p>`
+        : `<div class="field"><select id="a-plan" aria-label="Plan">
+            ${["Starter","Pro","Studio"].map(x=>`<option ${state.plan===x?"selected":""}>${x}</option>`).join("")}</select></div>
+          <div class="row"><label><input type="checkbox" id="a-terms"> I understand this is a local demo</label></div>
+          <p class="err" id="e-terms" hidden>${ic("alert")}<span></span></p>
+          <button class="btn btn-p btn-lg" type="submit" id="auth-btn"><span id="auth-lbl">Create account</span> ${ic("arrow")}</button>
+          <p class="swap">Already have one? <a href="#/login">Sign in</a></p>`}
+        <p class="fineprint">Demo interface — validation & session run locally in your browser.</p>
+      </form>
+    </section>
+  </main>`;
+}
+/* ---- app shell ---- */
+function shell(page, title){
+  document.body.dataset.mode = "night";
+  const s = state.session || {name:"Demo User", email:"demo@local"};
+  const unread = LS.get("notifs", []).filter(n=>!n.read).length;
+  const nav = [["app","Dashboard","grid"],["app/projects","Projects","folder"],["app/analytics","Analytics","chart"],["app/settings","Settings","gear"]];
+  return `<div class="scrim" data-action="nav-close"></div>
+  <div class="app">
+    <aside class="sidebar gd" aria-label="Workspace">
+      <a class="brand" href="#/">${ic("logo")} Alpenglow</a>
+      <nav class="snav">${nav.map(([h,l,i])=>`<a href="#/${h}" ${("#/"+h===location.hash.replace(/\/$/,"")||location.hash==="#/"+h)?"aria-current='page'":""}>${ic(i)} ${l}</a>`).join("")}</nav>
+      <div class="sp"></div>
+      <div style="position:relative">
+        <button class="uchip" data-action="user-menu" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar">${esc(s.name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase())}</span>
+          <span><b>${esc(s.name)}</b><span>${esc(state.plan)} plan</span></span>
+        </button>
+        <div class="pop gd" id="user-pop" role="menu" aria-label="Account">
+          <a class="snav" href="#/app/settings" style="padding:10px 12px;display:flex;gap:10px;align-items:center;color:var(--dk-muted);text-decoration:none;border-radius:10px">${ic("gear")} Settings</a>
+          <button data-action="signout" style="display:flex;gap:10px;align-items:center;width:100%;padding:10px 12px;border:0;background:none;border-radius:10px;cursor:pointer;color:var(--danger);font:600 14.5px var(--font-b)">${ic("out")} Sign out</button>
+        </div>
+      </div>
+    </aside>
+    <div class="app-main" style="display:grid;gap:16px;align-content:start;min-width:0">
+      <header class="topbar gd">
+        <button class="iconbtn burger" data-action="nav-open" aria-label="Open navigation">${ic("menu")}</button>
+        <h1 id="page-title" tabindex="-1">${title}</h1>
+        <div class="tsearch">${ic("search")}<input id="global-search" type="search" placeholder="Search ${title.toLowerCase()}…" value="${esc(state.q)}" aria-label="Search"></div>
+        <button class="iconbtn" data-action="search-open" aria-label="Toggle search" style="display:none" id="search-btn">${ic("search")}</button>
+        <div style="position:relative">
+          <button class="iconbtn" data-action="notif-open" aria-label="Notifications${unread?`, ${unread} unread`:""}" aria-expanded="false">${ic("bell")}${unread?`<span class="badge">${unread}</span>`:""}</button>
+          <div class="pop gd" id="notif-pop" aria-label="Notifications">
+            <h3>Notifications <button class="linklike" data-action="notif-read">Mark all read</button></h3>
+            <div id="notif-list"></div>
+          </div>
+        </div>
+        <button class="btn btn-p" data-action="task-new">${ic("plus")} <span class="lbl">New task</span></button>
+      </header>
+      <main id="page" class="page">${page}</main>
+    </div>
+  </div>`;
+}
+function pageDash(){
+  const tasks = LS.get("tasks", []);
+  const done = tasks.filter(t=>t.done).length;
+  return `<div class="panels dash">
+    <div class="col">
+      <section class="panel gd" aria-labelledby="h-today">
+        <h2 id="h-today">${ic("check")} Today <span class="chip ${done===tasks.length&&tasks.length?"active":"paused"}">${done}/${tasks.length} done</span></h2>
+        <form class="task-add" id="quick-add"><input id="qa-input" placeholder="Add a task and press Enter…" aria-label="New task title" maxlength="80"><button class="btn btn-p" type="submit" aria-label="Add task">${ic("plus")}</button></form>
+        <ul class="tasks" id="task-list">${taskRows(tasks)}</ul>
+      </section>
+      <section class="panel gd" aria-labelledby="h-focus">
+        <h2 id="h-focus">${ic("chart")} Focus, last 7 days</h2>
+        <div class="chart-wrap" id="dash-chart">${barSVG(seriesFor(7))}</div>
+        <p class="readout" id="chart-readout">Hover a bar for the day’s focused minutes.</p>
+      </section>
+    </div>
+    <div class="col">
+      <section class="panel gd" aria-labelledby="h-stats">
+        <h2 id="h-stats">${ic("spark")} This week</h2>
+        <div class="statrow"><b>${tasks.length}</b><span class="lbl">Open + done tasks</span><span class="delta up">+3</span></div>
+        <div class="statrow"><b>${LS.get("projects",[]).filter(p=>p.status==="Active").length}</b><span class="lbl">Active projects</span><span class="delta up">+1</span></div>
+        <div class="statrow"><b>4.2h</b><span class="lbl">Avg focus / day</span><span class="delta dn">−12m</span></div>
+      </section>
+      <section class="panel gd" aria-labelledby="h-act">
+        <h2 id="h-act">${ic("clock")} Activity <span class="chip sample">Sample</span></h2>
+        <ul class="feed">
+          <li>${ic("spark")}<span><b style="color:#fff">L. Chen</b> moved “Frost design tokens” to review — illustrative entry.</span></li>
+          <li>${ic("check")}<span><b style="color:#fff">You</b> completed “Export analytics CSV sample”.</span></li>
+          <li>${ic("folder")}<span><b style="color:#fff">S. Ibarra</b> paused “Mobile nav reflow” — illustrative entry.</span></li>
+        </ul>
+      </section>
+    </div>
+  </div>`;
+}
+function taskRows(tasks){
+  const q = state.q.toLowerCase();
+  const list = tasks.filter(t=>t.title.toLowerCase().includes(q));
+  if (!list.length) return `<li style="background:none"><div class="empty">${ic("search")}<span>${tasks.length?"No tasks match “"+esc(state.q)+"”.":"No tasks yet — add your first one above."}</span>${tasks.length&&q?`<button class="btn btn-g" data-action="clear-q">Clear search</button>`:""}</div></li>`;
+  return list.map(t=>`<li class="${t.done?"done":""}" data-id="${t.id}">
+    <input type="checkbox" ${t.done?"checked":""} data-action="task-toggle" aria-label="Mark “${esc(t.title)}” ${t.done?"not done":"done"}">
+    <span class="t">${esc(t.title)}</span><span class="due">${esc(t.due)}</span>
+    <button class="del" data-action="task-del" aria-label="Delete “${esc(t.title)}”">${ic("trash")}</button></li>`).join("");
+}
+function pageProjects(){
+  if (!state.projectsLoaded){
+    setTimeout(()=>{ state.projectsLoaded = true; if (location.hash==="#/app/projects") rerenderPage(); }, 550);
+    return `<div class="panel gd"><div class="toolbar"><div class="skel" style="width:140px"></div><div class="skel" style="width:110px"></div></div>
+      ${[...Array(5)].map(()=>`<div class="skel" style="margin:14px 0"></div>`).join("")}</div>`;
+  }
+  let rows = LS.get("projects", []).filter(p =>
+    (state.status==="All"||p.status===state.status) &&
+    (p.name+p.owner).toLowerCase().includes(state.q.toLowerCase()));
+  const k = state.sort.key, d = state.sort.dir;
+  rows.sort((a,b)=> (typeof a[k]==="number" ? a[k]-b[k] : String(a[k]).localeCompare(String(b[k]))) * d);
+  const selN = state.sel.size;
+  const arrow = key => state.sort.key===key ? (d===1?"↑":"↓") : "";
+  return `<section class="panel gd" aria-labelledby="h-proj" style="padding:16px">
+    <h2 id="h-proj" style="padding:4px 4px 0">${ic("folder")} Projects</h2>
+    <div class="toolbar">
+      <label class="sr" for="f-status">Filter by status</label>
+      <select id="f-status" data-action="filter-status">
+        ${["All","Active","Paused","Done"].map(s=>`<option ${state.status===s?"selected":""}>${s}</option>`).join("")}
+      </select>
+      <span class="count">${rows.length} of ${LS.get("projects",[]).length} projects</span>
+    </div>
+    ${selN?`<div class="bulkbar" role="region" aria-label="Bulk actions">${selN} selected
+      <button class="btn btn-g" data-action="bulk-done">${ic("check")} Mark done</button>
+      <button class="btn btn-d" data-action="bulk-del">${ic("trash")} Delete</button>
+      <button class="btn btn-g" data-action="bulk-clear">Clear</button></div>`:""}
+    ${rows.length?`<div class="twrap"><table>
+      <thead><tr>
+        <th style="width:34px"><input type="checkbox" data-action="sel-all" aria-label="Select all rows" ${selN&&selN===rows.length?"checked":""}></th>
+        <th><button data-action="sort" data-key="name">Project ${arrow("name")}</button></th>
+        <th><button data-action="sort" data-key="status">Status ${arrow("status")}</button></th>
+        <th><button data-action="sort" data-key="owner">Owner ${arrow("owner")}</button></th>
+        <th><button data-action="sort" data-key="due">Due ${arrow("due")}</button></th>
+        <th><button data-action="sort" data-key="progress">Progress ${arrow("progress")}</button></th>
+      </tr></thead>
+      <tbody>${rows.map(p=>`<tr data-row="${p.id}">
+        <td><input type="checkbox" data-action="sel-row" data-id="${p.id}" ${state.sel.has(p.id)?"checked":""} aria-label="Select ${esc(p.name)}"></td>
+        <td class="name">${esc(p.name)}</td>
+        <td><span class="chip ${p.status.toLowerCase()}">${p.status}</span></td>
+        <td>${esc(p.owner)}</td><td>${esc(p.due)}</td>
+        <td><div class="prog"><i style="width:${p.progress}%"></i></div></td></tr>`).join("")}</tbody>
+    </table></div>`
+    :`<div class="empty">${ic("folder")}<span>No projects match the current filter${state.q?` and search “${esc(state.q)}”`:""}.</span><button class="btn btn-g" data-action="clear-filters">Clear filters</button></div>`}
+  </section>`;
+}
+function pageAnalytics(){
+  const data = seriesFor(state.range);
+  const total = data.reduce((a,b)=>a+b.v,0);
+  const cats = [["Deep work",.52,"var(--primary-b)"],["Meetings",.27,"var(--c-blue)"],["Review",.21,"var(--c-pink)"]];
+  return `<div class="panels" style="grid-template-columns:1.7fr 1fr" class2="">
+    <section class="panel gd" aria-labelledby="h-an">
+      <h2 id="h-an">${ic("chart")} Focused minutes
+        <span class="tabs" role="tablist" aria-label="Range" style="margin-left:auto">
+          ${[7,30,90].map(r=>`<button role="tab" aria-selected="${state.range===r}" data-action="range" data-r="${r}">${r}d</button>`).join("")}
+        </span></h2>
+      <div class="chart-wrap">${state.range===7?barSVG(data):lineSVG(data)}</div>
+      <p class="readout">${state.range} days · ${total.toLocaleString()} focused minutes total</p>
+      <div style="margin-top:14px"><button class="btn btn-g" data-action="export-csv">${ic("down")} Export CSV (real file)</button></div>
+    </section>
+    <section class="panel gd" aria-labelledby="h-bd">
+      <h2 id="h-bd">${ic("spark")} Breakdown</h2>
+      <div class="breakdown">${cats.map(([n,f,c])=>`<div class="bd">
+        <div class="lbl"><span>${n}</span><b>${Math.round(total*f)}m</b></div>
+        <div class="prog"><i style="width:${f*100}%;background:${c}"></i></div></div>`).join("")}</div>
+      <p class="muted" style="margin-top:14px">Derived from the same series as the chart, so the export always matches what you see.</p>
+    </section>
+  </div>`;
+}
+function pageSettings(){
+  const s = state.session || {}, pf = state.prefs;
+  return `<div class="set-grid">
+    <section class="panel gd" aria-labelledby="h-prof">
+      <h2 id="h-prof">${ic("user")} Profile</h2>
+      <form id="profile-form" novalidate style="display:grid;gap:14px;max-width:420px">
+        <div class="field"><input id="p-name" placeholder=" " value="${esc(s.name||"")}"><label for="p-name">Full name</label></div>
+        <p class="err" id="pe-name" hidden>${ic("alert")}<span></span></p>
+        <div class="field"><input id="p-email" placeholder=" " value="${esc(s.email||"")}"><label for="p-email">Email</label></div>
+        <p class="err" id="pe-email" hidden>${ic("alert")}<span></span></p>
+        <div><button class="btn btn-p" type="submit">Save profile</button></div>
+      </form>
+    </section>
+    <section class="panel gd" aria-labelledby="h-pref">
+      <h2 id="h-pref">${ic("gear")} Preferences</h2>
+      <div class="set-row"><div class="txt"><b>Accent</b><span>Recolors primary actions across the app.</span></div>
+        <div class="swatches" role="group" aria-label="Accent color">
+          <button class="swatch sw-sunset" data-action="accent" data-a="sunset" aria-pressed="${pf.accent==="sunset"}" aria-label="Sunset accent"></button>
+          <button class="swatch sw-glacier" data-action="accent" data-a="glacier" aria-pressed="${pf.accent==="glacier"}" aria-label="Glacier accent"></button>
+          <button class="swatch sw-orchid" data-action="accent" data-a="orchid" aria-pressed="${pf.accent==="orchid"}" aria-label="Orchid accent"></button>
+        </div></div>
+      <div class="set-row"><div class="txt"><b>Dense tables</b><span>Tighter rows for scanning long lists.</span></div>
+        <label class="sw"><input type="checkbox" data-action="pref-dense" ${pf.dense?"checked":""} aria-label="Dense tables"><i></i></label></div>
+      <div class="set-row"><div class="txt"><b>Reduce motion</b><span>Stops float, tilt, sparks and transitions.</span></div>
+        <label class="sw"><input type="checkbox" data-action="pref-motion" ${pf.reduced?"checked":""} aria-label="Reduce motion"><i></i></label></div>
+    </section>
+    <section class="panel gd" aria-labelledby="h-data">
+      <h2 id="h-data">${ic("alert")} Data</h2>
+      <p class="muted">Tasks, projects, notifications, preferences and your session live in this browser only.</p>
+      <div style="margin-top:12px"><button class="btn btn-d" data-action="reset-data">${ic("trash")} Reset demo data</button></div>
+    </section>
+  </div>`;
+}
+function view404(){
+  document.body.dataset.mode = "night";
+  return `<main id="main" class="nf"><div><h1>404</h1><p>That route doesn’t exist in the demo.</p><a class="btn btn-p btn-lg" href="#/">Back to start</a></div></main>`;
+}
+/* =============== ROUTER =============== */
+const root = $("#root");
+function rerenderPage(){
+  const h = location.hash;
+  const map = {"#/app":pageDash, "#/app/projects":pageProjects, "#/app/analytics":pageAnalytics, "#/app/settings":pageSettings};
+  const titles = {"#/app":"Dashboard", "#/app/projects":"Projects", "#/app/analytics":"Analytics", "#/app/settings":"Settings"};
+  $("#page").innerHTML = map[h]();
+  $("#page-title").textContent = titles[h];
+  document.querySelectorAll(".snav a").forEach(a=>{
+    if (a.getAttribute("href")===h) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
+  });
+  const gs = $("#global-search"); if (gs) gs.placeholder = "Search " + titles[h].toLowerCase() + "…";
+}
+function render(){
+  const h = location.hash || "#/";
+  document.body.classList.remove("nav-open","menu-open","search-open");
+  closePops();
+  if (h.startsWith("#/app")){
+    if (!state.session){ toast("Sign in to open the workspace.", "info"); location.hash = "#/login"; return; }
+    const map = {"#/app":pageDash, "#/app/projects":pageProjects, "#/app/analytics":pageAnalytics, "#/app/settings":pageSettings};
+    const titles = {"#/app":"Dashboard", "#/app/projects":"Projects", "#/app/analytics":"Analytics", "#/app/settings":"Settings"};
+    if (!map[h]){ root.innerHTML = view404(); return; }
+    root.innerHTML = shell(map[h](), titles[h]);
+    renderNotifs();
+  } else if (h === "#/" || h === "#"){ root.innerHTML = viewLanding(); }
+  else if (h === "#/login"){ root.innerHTML = state.session ? (location.hash="#/app", "") : authView("login"); if(!state.session) focusAuth(); }
+  else if (h === "#/signup"){ root.innerHTML = authView("signup"); focusAuth(); }
+  else { root.innerHTML = view404(); }
+  window.scrollTo(0,0);
+}
+function focusAuth(){ const t = $("#auth-title"); if (t) t.focus({preventScroll:true}); }
+window.addEventListener("hashchange", render);
+
+/* =============== NOTIFS =============== */
+function renderNotifs(){
+  const box = $("#notif-list"); if (!box) return;
+  const list = LS.get("notifs", []);
+  box.innerHTML = list.length ? list.map(n=>`<div class="notif ${n.read?"read":"unread"}" data-nid="${n.id}"><span class="dot"></span><div>${esc(n.text)}<time>${esc(n.time)}</time></div></div>`).join("") : `<p class="muted" style="padding:8px">Nothing here yet.</p>`;
+}
+function closePops(){ document.querySelectorAll(".pop.open").forEach(p=>p.classList.remove("open")); }
+
+/* =============== EVENTS =============== */
+document.addEventListener("click", e => {
+  const pop = e.target.closest(".pop");
+  if (!pop && !e.target.closest("[data-action='notif-open']") && !e.target.closest("[data-action='user-menu']")) closePops();
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const a = el.dataset.action;
+  switch(a){
+    case "menu-open": document.body.classList.add("menu-open"); break;
+    case "menu-close": case "menu-close2": document.body.classList.remove("menu-open"); break;
+    case "nav-open": document.body.classList.add("nav-open"); break;
+    case "nav-close": document.body.classList.remove("nav-open"); break;
+    case "search-open": document.body.classList.toggle("search-open"); const i=$("#global-search"); if(i&&document.body.classList.contains("search-open")) i.focus(); break;
+    case "toggle-pass": {
+      const inp = el.parentElement.querySelector("input");
+      const show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      el.setAttribute("aria-pressed", String(show));
+      el.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      el.children[0].style.display = show ? "none" : "";
+      el.children[1].style.display = show ? "" : "none";
+      break;
+    }
+    case "forgot": $("#dlg-forgot").showModal(); break;
+    case "fg-close": $("#dlg-forgot").close(); break;
+    case "demo-fill": $("#a-user").value = "demo"; $("#a-pass").value = "glass123"; toast("Demo credentials filled.", "info"); break;
+    case "pick-plan": state.plan = el.dataset.plan; LS.set("plan", state.plan); location.hash = "#/signup"; toast(el.dataset.plan + " plan selected — finish sign-up.", "info"); break;
+    case "notif-open": { const p = $("#notif-pop"); const open = p.classList.toggle("open"); el.setAttribute("aria-expanded", String(open)); $("#user-pop").classList.remove("open"); break; }
+    case "notif-read": LS.set("notifs", LS.get("notifs",[]).map(n=>({...n, read:true}))); renderNotifs(); render(); toast("All notifications marked read.", "ok"); break;
+    case "user-menu": { const p = $("#user-pop"); const open = p.classList.toggle("open"); el.setAttribute("aria-expanded", String(open)); $("#notif-pop").classList.remove("open"); break; }
+    case "signout": state.session = null; LS.del("session"); location.hash = "#/login"; toast("Signed out. Session cleared from this browser.", "ok"); break;
+    case "task-new": $("#dlg-task").showModal(); $("#tk-name").focus(); break;
+    case "tk-cancel": $("#dlg-task").close(); break;
+    case "task-toggle": {
+      const id = +el.closest("li").dataset.id;
+      LS.set("tasks", LS.get("tasks",[]).map(t=>t.id===id?{...t,done:!t.done}:t));
+      rerenderDashTasks(); break;
+    }
+    case "task-del": {
+      const id = +el.closest("li").dataset.id;
+      LS.set("tasks", LS.get("tasks",[]).filter(t=>t.id!==id));
+      rerenderDashTasks(); toast("Task deleted.", "ok"); break;
+    }
+    case "clear-q": state.q = ""; const gs=$("#global-search"); if(gs) gs.value=""; rerenderDashTasks(); break;
+    case "sort": { const k = el.dataset.key; state.sort = {key:k, dir: state.sort.key===k ? -state.sort.dir : 1}; rerenderPage(); break; }
+    case "filter-status": break; /* handled on change */
+    case "sel-all": { const rows = LS.get("projects",[]); state.sel = el.checked ? new Set(rows.map(r=>r.id)) : new Set(); rerenderPage(); break; }
+    case "sel-row": { const id = +el.dataset.id; el.checked ? state.sel.add(id) : state.sel.delete(id); rerenderPage(); break; }
+    case "bulk-clear": state.sel.clear(); rerenderPage(); break;
+    case "bulk-done": LS.set("projects", LS.get("projects",[]).map(p=>state.sel.has(p.id)?{...p,status:"Done",progress:100}:p)); state.sel.clear(); rerenderPage(); toast("Selected projects marked done.", "ok"); break;
+    case "bulk-del": confirmDlg("Delete the selected projects? This only affects demo data in this browser.", ()=>{ LS.set("projects", LS.get("projects",[]).filter(p=>!state.sel.has(p.id))); state.sel.clear(); rerenderPage(); toast("Projects deleted.", "ok"); }); break;
+    case "clear-filters": state.status="All"; state.q=""; const g=$("#global-search"); if(g) g.value=""; rerenderPage(); break;
+    case "range": state.range = +el.dataset.r; rerenderPage(); break;
+    case "export-c": case "export-csv": {
+      const data = seriesFor(state.range);
+      const csv = "date,focused_minutes\n" + data.map(d=>d.date+","+d.v).join("\n");
+      const url = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
+      const link = document.createElement("a"); link.href = url; link.download = "alpenglow-focus-"+state.range+"d.csv"; link.click();
+      URL.revokeObjectURL(url); toast("CSV downloaded.", "ok"); break;
+    }
+    case "accent": state.prefs.accent = el.dataset.a; LS.set("prefs", state.prefs); applyPrefs(); rerenderPage(); toast("Accent updated.", "ok"); break;
+    case "reset-data": confirmDlg("Reset all demo data? Tasks, projects, notifications, preferences and your session will be re-seeded.", ()=>{ ["tasks","projects","notifs","prefs","session","v","plan"].forEach(LS.del); seed(); state.session=null; state.sel.clear(); applyPrefs(); location.hash="#/login"; render(); toast("Demo data reset.", "ok"); }); break;
+    case "cf-cancel": $("#dlg-confirm").close(); break;
+    case "cf-ok": $("#dlg-confirm").close(); if (cfCb) cfCb(); cfCb = null; break;
+    case "pj-close": $("#dlg-project").close(); break;
+  }
+});
+document.addEventListener("change", e => {
+  const el = e.target;
+  if (el.id === "pay-toggle"){
+    document.querySelectorAll(".plan .price").forEach(p=>{
+      const v = el.checked ? p.dataset.y : p.dataset.m;
+      p.innerHTML = "$" + v + (el.checked ? "<small> /yr</small>" : "<small> /mo</small>");
+    });
+  }
+  if (el.id === "f-status"){ state.status = el.value; rerenderPage(); }
+  if (el.dataset.action === "pref-dense"){ state.prefs.dense = el.checked; LS.set("prefs", state.prefs); document.body.classList.toggle("dense", el.checked); }
+  if (el.dataset.action === "pref-motion"){ state.prefs.reduced = el.checked; LS.set("prefs", state.prefs); document.body.classList.toggle("force-reduced", el.checked); }
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "global-search"){
+    state.q = e.target.value;
+    if (location.hash === "#/app/projects") rerenderPage();
+    else if (location.hash === "#/app" || location.hash === "#/") rerenderDashTasks();
+  }
+});
+document.addEventListener("mouseover", e => {
+  const b = e.target.closest(".bar"); const ro = $("#chart-readout");
+  if (b && ro) ro.textContent = b.dataset.l + " — " + b.dataset.v + " focused minutes";
+});
+/* row click → project dialog */
+document.addEventListener("click", e => {
+  const tr = e.target.closest("tr[data-row]");
+  if (!tr || e.target.closest("input,button")) return;
+  const p = LS.get("projects",[]).find(x=>x.id===+tr.dataset.row);
+  $("#pj-title").textContent = p.name;
+  $("#pj-body").innerHTML = `Status: <b style="color:#fff">${p.status}</b> · Owner: <b style="color:#fff">${esc(p.owner)}</b> · Due: <b style="color:#fff">${esc(p.due)}</b> · Progress: <b style="color:#fff">${p.progress}%</b><br><br>This dialog stands in for a project detail screen in the demo.`;
+  $("#dlg-project").showModal();
+});
+/* forms */
+document.addEventListener("submit", e => {
+  const f = e.target;
+  const setErr = (id, msg) => { const p = $(id); if(!p) return; p.hidden = !msg; if(msg) p.querySelector("span").textContent = msg;
+    const inp = p.parentElement.querySelector("input"); if (inp) inp.classList.toggle("invalid", !!msg); };
+  if (f.id === "auth-form"){
+    e.preventDefault();
+    const mode = f.dataset.mode;
+    let ok = true, first = null;
+    const name = $("#a-name"), user = $("#a-user"), pass = $("#a-pass");
+    if (mode === "signup"){
+      if (!name.value.trim()){ setErr("#e-name","Enter your name."); ok=false; first=first||name; } else setErr("#e-name",null);
+    }
+    const u = user.value.trim();
+    if (mode === "signup"){
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(u)){ setErr("#e-user","Enter a valid email address."); ok=false; first=first||user; } else setErr("#e-user",null);
+    } else if (u.length < 3){ setErr("#e-user","Enter at least 3 characters."); ok=false; first=first||user; } else setErr("#e-user",null);
+    if (pass.value.length < 6){ setErr("#e-pass","Password needs at least 6 characters."); ok=false; first=first||pass; } else setErr("#e-pass",null);
+    if (mode === "signup" && !$("#a-terms").checked){ setErr("#e-terms","Please acknowledge the demo notice."); ok=false; first=first||$("#a-terms"); } else setErr("#e-terms",null);
+    if (!ok){ f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake"); if(first) first.focus(); return; }
+    const btn = $("#auth-btn"); btn.disabled = true; $("#auth-lbl").textContent = mode==="login" ? "Signing in…" : "Creating…";
+    setTimeout(()=>{
+      state.session = { name: mode==="signup" ? name.value.trim() : (u.includes("@") ? u.split("@")[0] : u), email: u.includes("@") ? u : u + "@local.demo" };
+      if (mode === "signup") state.plan = $("#a-plan").value;
+      LS.set("session", state.session); LS.set("plan", state.plan);
+      location.hash = "#/app"; toast("Signed in — demo session stored locally.", "ok");
+    }, 800);
+  }
+  if (f.id === "quick-add"){
+    e.preventDefault();
+    const v = $("#qa-input").value.trim();
+    if (!v){ toast("Give the task a title first.", "err"); return; }
+    const tasks = LS.get("tasks", []);
+    tasks.unshift({id: Date.now(), title: v, done:false, due:"Today"});
+    LS.set("tasks", tasks); $("#qa-input").value = ""; rerenderDashTasks();
+  }
+  if (f.id === "task-form"){
+    e.preventDefault();
+    const v = $("#tk-name").value.trim();
+    if (!v){ const p=$("#tk-err"); p.hidden=false; p.querySelector("span").textContent="Enter a task title."; return; }
+    const tasks = LS.get("tasks", []);
+    tasks.unshift({id: Date.now(), title: v, done:false, due:"Today"});
+    LS.set("tasks", tasks); f.reset(); $("#dlg-task").close();
+    if (location.hash.startsWith("#/app")) { rerenderPage(); } toast("Task added.", "ok");
+  }
+  if (f.id === "profile-form"){
+    e.preventDefault();
+    let ok = true;
+    const n = $("#p-name").value.trim(), em = $("#p-email").value.trim();
+    if (n.length < 2){ setErr("#pe-name","Enter your name."); ok=false; } else setErr("#pe-name",null);
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ setErr("#pe-email","Enter a valid email address."); ok=false; } else setErr("#pe-email",null);
+    if (!ok) return;
+    state.session = {...state.session, name:n, email:em}; LS.set("session", state.session);
+    render(); toast("Profile saved in this browser.", "ok");
+  }
+});
+function rerenderDashTasks(){
+  const ul = $("#task-list"); if (!ul) return;
+  ul.innerHTML = taskRows(LS.get("tasks", []));
+  const tasks = LS.get("tasks", []), done = tasks.filter(t=>t.done).length;
+  const chip = ul.closest("section").querySelector(".chip");
+  if (chip){ chip.textContent = done + "/" + tasks.length + " done"; chip.className = "chip " + (tasks.length && done===tasks.length ? "active" : "paused"); }
+}
+/* =============== PREFS / FX =============== */
+function applyPrefs(){
+  document.documentElement.dataset.accent = state.prefs.accent;
+  document.body.classList.toggle("dense", state.prefs.dense);
+  document.body.classList.toggle("force-reduced", state.prefs.reduced);
+}
+applyPrefs();
+/* tilt on hero demo */
+const fine = matchMedia("(pointer: fine)").matches;
+const reducedMQ = matchMedia("(prefers-reduced-motion: reduce)");
+if (fine){
+  let tick = false, px = 0, py = 0;
+  addEventListener("pointermove", e => {
+    if (reducedMQ.matches || document.body.classList.contains("force-reduced")) return;
+    const box = $("#tiltbox"); if (!box) return;
+    px = e.clientX / innerWidth - .5; py = e.clientY / innerHeight - .5;
+    if (!tick){ tick = true; requestAnimationFrame(()=>{ tick = false; box.style.transform = `rotateY(${(px*7).toFixed(2)}deg) rotateX(${(-py*6).toFixed(2)}deg)`; }); }
+  });
+}
+/* sparks */
+(function(){
+  const c = $("#sparks"), ctx = c.getContext("2d");
+  let W, H, parts = [], run = true, dpr = Math.min(devicePixelRatio||1, 2), last = 0;
+  function spawn(init){ const warm = Math.random() > .25;
+    return {x:Math.random()*W, y:init?Math.random()*H:H+8, r:.8+Math.random()*1.9, vy:.15+Math.random()*.4, ph:Math.random()*6.28, sp:.4+Math.random()*.8, c:warm?"255,190,110":"170,200,255"}; }
+  function resize(){ W=c.clientWidth; H=c.clientHeight; c.width=W*dpr; c.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    parts = Array.from({length: Math.min(60, Math.round(W*H/26000))}, ()=>spawn(true)); }
+  function loop(t){ if(!run) return; requestAnimationFrame(loop); if (t-last<33) return; last=t;
+    ctx.clearRect(0,0,W,H);
+    for (let i=0;i<parts.length;i++){ const p=parts[i]; p.y-=p.vy; p.ph+=.02*p.sp; p.x+=Math.sin(p.ph)*.35;
+      if (p.y<-10) parts[i]=p=spawn(false);
+      ctx.beginPath(); ctx.fillStyle=`rgba(${p.c},${(.25+.45*(0.5+0.5*Math.sin(p.ph*2))).toFixed(2)})`;
+      ctx.shadowColor=`rgba(${p.c},.8)`; ctx.shadowBlur=7; ctx.arc(p.x,p.y,p.r,0,6.2832); ctx.fill(); }
+    ctx.shadowBlur=0; }
+  resize(); addEventListener("resize", resize);
+  document.addEventListener("visibilitychange", ()=>{ if (document.hidden) run=false; else if (!reducedMQ.matches && !document.body.classList.contains("force-reduced")){ run=true; requestAnimationFrame(loop);} });
+  if (!reducedMQ.matches) requestAnimationFrame(loop);
+})();
+/* eye-off initially hidden */
+document.addEventListener("DOMContentLoaded", ()=>{ document.querySelectorAll(".toggle-pass").forEach(b=>b.children[1].style.display="none"); });
+render();
+</script>
+</body>
+</html>
