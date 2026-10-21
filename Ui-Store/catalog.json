@@ -1,8 +1,27 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T15:04:44.847Z",
+  "lastUpdated": "2026-10-21T15:05:52.041Z",
   "repository": "Sansmatic-z/OpenUi",
   "items": [
+    {
+      "id": "ui-tea-ui-mvi8vbar",
+      "name": "Tea-ui",
+      "slug": "tea-ui",
+      "description": "Idk 😐",
+      "category": "ecommerce",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/tea-ui-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-21T15:05:51.603Z",
+      "updatedAt": "2026-10-21T15:05:51.603Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "27fd6000bd697ea4e89689abc7e5a234be6fd0bd"
+    },
     {
       "id": "ui-lps66790-mvi8s78i",
       "name": "Lps66790",
