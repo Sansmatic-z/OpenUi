@@ -1,8 +1,27 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-10-21T16:59:23.265Z",
+  "lastUpdated": "2026-10-24T03:16:08.485Z",
   "repository": "Sansmatic-z/OpenUi",
   "items": [
+    {
+      "id": "ui-mobile-ui-x10-mvltu5fa",
+      "name": "Mobile ui x10",
+      "slug": "mobile-ui-x10",
+      "description": "Clean landing component built with HTML and Tailwind CSS.",
+      "category": "landing",
+      "tags": [
+        "Tailwind",
+        "Responsive",
+        "Modern"
+      ],
+      "filePath": "Ui-Store/mobile-ui-x10-html.html",
+      "author": "adminraj",
+      "createdAt": "2026-10-24T03:16:07.798Z",
+      "updatedAt": "2026-10-24T03:16:07.798Z",
+      "downloadsCount": 0,
+      "copiesCount": 0,
+      "sha": "fb24d3b80033a14faba629933421aa9e7af8f678"
+    },
     {
       "id": "ui-simple-full-ui-mvicxans",
       "name": "Simple full ui",
